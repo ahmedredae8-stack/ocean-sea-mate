@@ -3,12 +3,11 @@ import { Anchor, Check, Crown, Gem, Minus, Plus, Shield, ShipWheel, Swords, User
 
 import { GameSprite } from "@/components/GameSprite";
 import { ARMORS, CREWS, GEM_PACKS, WEAPONS } from "@/lib/items";
-import { fleetCatalog } from "@/lib/fleetCatalog";
 import { fmt } from "@/lib/ships";
 import { currentPhase, phaseLabel, themes } from "@/lib/themes";
 import { playSfx } from "@/lib/sound";
 import { useArtwork } from "@/lib/artwork";
-import { buyGear, buyShip, ownedShips } from "@/lib/harbor";
+import { buyGear } from "@/lib/harbor";
 import { TradingFloor } from "@/components/TradingFloor";
 
 const COIN = "https://project--356242e8-144f-42b3-8292-474399c324ac.lovable.app/__l5e/assets-v1/906f37c0-d530-4e50-a3ce-00deaaf40a02/coin.png";
@@ -204,5 +203,3 @@ function Showcase({ items }: { items: Product[] }) {
   );
 }
 
-// Ship purchases live in TradingFloor; keep these helpers referenced for parity.
-void buyShip; void ownedShips; void fleetCatalog;
