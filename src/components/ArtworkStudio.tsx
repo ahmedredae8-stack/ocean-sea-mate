@@ -1,0 +1,139 @@
+import { useEffect, useMemo, useRef, useState } from "react";
+import { ImagePlus, Rocket, Search, Ship, Trash2, UploadCloud } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
+import { ARTWORK_UPDATED, artworkUrl, exportArtwork, listArtwork, type ArtworkPose } from "@/lib/artwork";
+import { fleetCatalog } from "@/lib/fleetCatalog";
+import { ARMORS, CREWS, GEM_PACKS, WEAPONS } from "@/lib/items";
+
+const poses = {
+  ship: [["idle", "عادية"], ["cast", "رمي الشباك"], ["submerged", "تحت الماء"], ["haul", "لم الشباك"]],
+  rocket: [["idle", "استعداد"], ["flight", "تحليق"], ["explosion", "انفجار"], ["fire", "نيران"], ["smoke", "دخان"], ["fade", "تلاشي"]],
+  crew: [["idle", "صورة المتجر"]],
+  armor: [["idle", "صورة المتجر"]],
+  gem: [["idle", "صورة المتجر"]],
+} as const;
+type Kind = keyof typeof poses;
+
+type Item = { key: string; name: string; info: string; fallback?: string };
+
+const shipItems: Item[] = fleetCatalog.map(s => ({ key: `ship-${s.id}`, name: s.name, info: `${s.price.toLocaleString("ar-EG")} ${s.currency === "coin" ? "عملة" : "جوهرة"}${s.source === "tribe" ? " · قبيلة" : ""}`, fallback: s.hull }));
+const rocketItems: Item[] = WEAPONS.map(w => ({ key: w.id, name: w.name, info: `${w.price.toLocaleString("ar-EG")} ${w.currency === "coin" ? "عملة" : "جوهرة"}`, fallback: w.icon }));
+
+const crewItems: Item[] = CREWS.map(c => ({ key: c.id, name: c.name, info: c.desc, fallback: c.icon }));
+const armorItems: Item[] = ARMORS.map(a => ({ key: a.id, name: a.name, info: a.desc }));
+const gemItems: Item[] = GEM_PACKS.map(g => ({ key: `gem-${g.id}`, name: `${g.gems} جوهرة`, info: String(g.price) }));
+const itemsOf: Record<Kind, Item[]> = { ship: shipItems, rocket: rocketItems, crew: crewItems, armor: armorItems, gem: gemItems };
+const kindLabel: Record<Kind, string> = { ship: "سفن", rocket: "صواريخ", crew: "طواقم", armor: "دروع", gem: "جواهر" };
+
+export function ArtworkStudio() {
+  const [category, setCategory] = useState<Kind>("ship");
+  const [query, setQuery] = useState("");
+  const [selected, setSelected] = useState<string>(shipItems[0]?.key ?? "ship-1");
+  const [records, setRecords] = useState<ArtworkPose[]>([]);
+  const [urls, setUrls] = useState<Record<string, string>>({});
+  const [status, setStatus] = useState("");
+  const [busy, setBusy] = useState<string | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const pendingPose = useRef<ArtworkPose["pose"]>("idle");
+
+  const items = itemsOf[category];
+  const filtered = useMemo(() => items.filter(i => i.name.includes(query.trim())), [items, query]);
+  const item = items.find(i => i.key === selected) ?? items[0];
+
+  const refresh = async () => {
+    try {
+      const rows = await listArtwork();
+      setRecords(rows);
+      const signed = await Promise.all(rows.map(async row => [row.id, await artworkUrl(row.image_path).catch(() => "")] as const));
+      setUrls(Object.fromEntries(signed));
+    } catch { setStatus("تعذّر تحميل مكتبة الصور"); }
+  };
+  useEffect(() => { void refresh(); }, []);
+
+  const poseRecord = (pose: string) => records.find(r => r.subject === item?.key && r.pose === pose);
+
+  const pick = (pose: ArtworkPose["pose"]) => { pendingPose.current = pose; fileRef.current?.click(); };
+
+  const upload = async (file: File) => {
+    if (!item) return;
+    const pose = pendingPose.current;
+    if (file.type !== "image/png" || file.size > 5 * 1024 * 1024) { setStatus("اختر صورة PNG شفافة لا تتجاوز 5 ميجابايت"); return; }
+    setBusy(pose); setStatus("");
+    try {
+    const { data: auth } = await supabase.auth.getUser();
+    if (!auth.user) { setStatus("سجل دخولك أولاً"); setBusy(null); return; }
+    const path = `${auth.user.id}/${crypto.randomUUID()}.png`;
+    const { error: upErr } = await supabase.storage.from("game-artwork").upload(path, file, { contentType: "image/png" });
+    if (upErr) { setStatus("تعذّر رفع الصورة — تأكد من صلاحية المشرف."); setBusy(null); return; }
+    const { error } = await supabase.from("artwork_poses").insert({ category: category === "ship" ? "ship" : "rocket", subject: item.key, pose, image_path: path, created_by: auth.user.id });
+    if (error) { await supabase.storage.from("game-artwork").remove([path]); setStatus("تعذّر حفظ الوضعية"); setBusy(null); return; }
+    const old = poseRecord(pose);
+    if (old) { await supabase.from("artwork_poses").delete().eq("id", old.id); await supabase.storage.from("game-artwork").remove([old.image_path]); }
+    setStatus(`تم نشر وضعية «${poses[category].find(([p]) => p === pose)?.[1]}» لـ ${item.name}`);
+    await refresh(); window.dispatchEvent(new Event(ARTWORK_UPDATED)); setBusy(null);
+    } catch { setStatus("تعذّر نشر الصورة. تحقق من الاتصال وحاول مرة أخرى."); }
+    finally { setBusy(null); }
+  };
+
+  const remove = async (row: ArtworkPose) => {
+    if (!window.confirm("حذف هذه الوضعية والعودة للصورة الأصلية؟")) return;
+    const { error } = await supabase.from("artwork_poses").delete().eq("id", row.id);
+    if (error) { setStatus("تعذّر حذف الوضعية"); return; }
+    await supabase.storage.from("game-artwork").remove([row.image_path]);
+    await refresh();
+    window.dispatchEvent(new Event(ARTWORK_UPDATED));
+  };
+
+  const doExport = async () => {
+    setStatus("جارٍ تجهيز التصدير…");
+    try {
+      const data = await exportArtwork();
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = `sea-tales-artwork-${Date.now()}.json`;
+      a.click();
+      URL.revokeObjectURL(a.href);
+      setStatus(`تم تصدير ${data.count} صورة — أرسل الملف لاعتماده كأساس دائم`);
+    } catch { setStatus("تعذّر التصدير"); }
+  };
+
+  const switchCat = (c: Kind) => { setCategory(c); setSelected(itemsOf[c][0]?.key ?? ""); setQuery(""); };
+
+  if (!item) return <p role="status">لا توجد عناصر متاحة.</p>;
+
+  return <section className="art-studio" aria-label="استوديو الإدارة">
+    <div className="art-studio-head"><ImagePlus /><div><small>غرفة المشرف</small><h2>استوديو صور المتجر والسفن</h2></div><Button className="ms-auto" onClick={() => void doExport()}>تصدير كامل</Button></div>
+    <div className="art-mode" role="group" aria-label="النوع">
+      {(Object.keys(itemsOf) as Kind[]).map(k => <Button key={k} variant="ghost" className={category === k ? "active" : ""} onClick={() => switchCat(k)}>{k === "ship" ? <Ship /> : k === "rocket" ? <Rocket /> : <ImagePlus />} {kindLabel[k]} ({itemsOf[k].length})</Button>)}
+    </div>
+    <label className="art-label"><span style={{ display: "flex", gap: 6, alignItems: "center" }}><Search size={16} /> بحث</span><input value={query} onChange={e => setQuery(e.target.value)} placeholder="ابحث بالاسم" /></label>
+    <div className="art-library" style={{ maxHeight: 260, overflowY: "auto" }}>
+      {filtered.map(i => {
+        const thumb = records.find(r => r.subject === i.key && r.pose === "idle");
+        const count = records.filter(r => r.subject === i.key).length;
+        return <Button variant="ghost" type="button" key={i.key} className={`art-record ${i.key === item.key ? "active" : ""}`} onClick={() => setSelected(i.key)} aria-pressed={i.key === item.key}>
+          <div className="art-record-image"><img src={(thumb && urls[thumb.id]) || i.fallback} alt="" /></div>
+          <div><strong>{i.name}</strong><small>{i.info} · {count}/{poses[category].length} وضعيات</small></div>
+        </Button>;
+      })}
+    </div>
+    <h3>وضعيات: {item.name}</h3>
+    <input ref={fileRef} type="file" accept="image/png" hidden onChange={e => { const f = e.target.files?.[0]; e.target.value = ""; if (f) void upload(f); }} />
+    <div className="art-library" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(140px,1fr))", gap: 10 }}>
+      {poses[category].map(([pose, label]) => {
+        const rec = poseRecord(pose);
+        return <div key={pose} className="art-record" style={{ flexDirection: "column", alignItems: "stretch" }}>
+          <div className="art-record-image" style={{ width: "100%", height: 100 }}>{rec && urls[rec.id] ? <img src={urls[rec.id]} alt={label} /> : pose === "idle" && item.fallback ? <img src={item.fallback} alt="" style={{ opacity: 0.5 }} /> : <UploadCloud />}</div>
+          <strong>{label}</strong><small>{rec ? "منشورة" : "الافتراضية"}</small>
+          <div style={{ display: "flex", gap: 6 }}>
+            <Button size="sm" disabled={!!busy} onClick={() => pick(pose)}>{busy === pose ? "جارٍ…" : rec ? "استبدال" : "رفع"}</Button>
+            {rec && <Button size="icon" variant="ghost" aria-label={`حذف ${label}`} onClick={() => void remove(rec)}><Trash2 /></Button>}
+          </div>
+        </div>;
+      })}
+    </div>
+    {status && <p className="art-status" role="status">{status}</p>}
+  </section>;
+}
