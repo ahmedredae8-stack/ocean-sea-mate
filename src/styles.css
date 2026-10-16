@@ -2578,3 +2578,13 @@
 @media (prefers-reduced-motion: reduce) {
   .cabin-frame, .cabin-overlay, .legend-art, .legend-mist, .arsenal-halo, .arsenal-stage-art > * { animation: none !important; }
 }
+.legend-crest h1 { line-height: 1.5; margin: 0.2rem 0 0; }
+.legend-crest p { margin-top: -0.2rem; }
+/* Ships wing inside the arsenal shares the cabin palette */
+.arsenal .mk { color: var(--gb-foam); background: none !important; }
+.arsenal .mk-ships ul { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.6rem; }
+.arsenal .mk-ships h3 { font-family: var(--gb-display); color: var(--gb-bronze-hi); }
+.arsenal .mk-ship { border-radius: 16px; border: 1px solid oklch(1 0 0 / 0.08); background: linear-gradient(180deg, oklch(1 0 0 / 0.05), oklch(1 0 0 / 0.015)); }
+.arsenal .mk-ship.is-mine { border-color: var(--gb-sea); box-shadow: 0 0 0 1px var(--gb-sea); }
+.arsenal .mk-ship button { border-radius: 10px; color: var(--gb-ink); background: linear-gradient(180deg, var(--gb-bronze-hi), var(--gb-bronze)); }
+.arsenal .mk-ship-specs div { background: oklch(1 0 0 / 0.05); }
