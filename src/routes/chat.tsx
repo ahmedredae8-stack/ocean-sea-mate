@@ -15,7 +15,7 @@ export const Route = createFileRoute("/chat")({
   head: () => ({
     meta: [
       { title: "لاسلكي المرفأ — خليج القراصنة" },
-      { name: "description", content: "دردشة مباشرة بين لاعبي خليج الجزيرة: غرفة عامة ومحادثات خاصة مع الأصدقاء." },
+      { name: "description", content: "دردشة مباشرة بين لاعبي خليج القراصنة: غرفة عامة ومحادثات خاصة مع الأصدقاء." },
       { property: "og:title", content: "لاسلكي المرفأ — خليج القراصنة" },
       { property: "og:description", content: "غرفة عامة ومحادثات خاصة بين قباطنة الخليج، بالوقت الحقيقي." },
       { property: "og:type", content: "website" },

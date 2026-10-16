@@ -15,7 +15,7 @@ export const Route = createFileRoute("/shipyard")({
       { title: "حوض البناء الملكي — خليج القراصنة" },
       { name: "description", content: "اشترِ وطوّر سفنك: أرسلها للميناء أو للإبحار أو اختر طاقمها." },
       { property: "og:title", content: "حوض البناء الملكي — خليج القراصنة" },
-      { property: "og:description", content: "كتالوج السفن والترقيات وإدارة الطواقم داخل خليج الجزيرة." },
+      { property: "og:description", content: "كتالوج السفن والترقيات وإدارة الطواقم داخل خليج القراصنة." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],

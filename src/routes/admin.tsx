@@ -5,7 +5,7 @@ import { ArtworkStudio } from "@/components/ArtworkStudio";
 import { isArtworkAdmin } from "@/lib/artwork";
 
 export const Route = createFileRoute("/admin")({
-  head: () => ({ meta: [{ title: "استوديو الوضعيات — Island Bay" }, { name: "description", content: "رفع وضعيات السفن والصواريخ للمشرفين." }, { property: "og:title", content: "استوديو الوضعيات — Island Bay" }, { property: "og:description", content: "إدارة صور الوضعيات." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
+  head: () => ({ meta: [{ title: "استوديو الوضعيات — خليج القراصنة" }, { name: "description", content: "رفع وضعيات السفن والصواريخ للمشرفين." }, { property: "og:title", content: "استوديو الوضعيات — خليج القراصنة" }, { property: "og:description", content: "إدارة صور الوضعيات." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
   ssr: false,
   component: AdminPage,
 });

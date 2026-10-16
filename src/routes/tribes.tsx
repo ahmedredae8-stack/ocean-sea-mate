@@ -28,7 +28,7 @@ export const Route = createFileRoute("/tribes")({
   head: () => ({
     meta: [
       { title: "مجلس الأساطيل — خليج القراصنة" },
-      { name: "description", content: "انضم إلى قبيلة، ارتقِ في الرتب، أنجز مهام القبيلة وتصدّر قائمة القادة في خليج الجزيرة." },
+      { name: "description", content: "انضم إلى قبيلة، ارتقِ في الرتب، أنجز مهام القبيلة وتصدّر قائمة القادة في خليج القراصنة." },
       { property: "og:title", content: "مجلس الأساطيل — خليج القراصنة" },
       { property: "og:description", content: "قبائل القراصنة: انضمام، ترقيات، مهام يومية وقائمة متصدرين." },
       { property: "og:type", content: "website" },
