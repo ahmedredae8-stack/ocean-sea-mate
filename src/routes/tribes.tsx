@@ -27,9 +27,9 @@ import {
 export const Route = createFileRoute("/tribes")({
   head: () => ({
     meta: [
-      { title: "القبائل — خليج الجزيرة" },
+      { title: "مجلس الأساطيل — خليج القراصنة" },
       { name: "description", content: "انضم إلى قبيلة، ارتقِ في الرتب، أنجز مهام القبيلة وتصدّر قائمة القادة في خليج الجزيرة." },
-      { property: "og:title", content: "القبائل — خليج الجزيرة" },
+      { property: "og:title", content: "مجلس الأساطيل — خليج القراصنة" },
       { property: "og:description", content: "قبائل القراصنة: انضمام، ترقيات، مهام يومية وقائمة متصدرين." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -61,7 +61,7 @@ export function TribesPage() {
         setMine(m);
         setMembers(m ? await listMembers(m.tribe_id) : []);
       } else { setMine(null); setMembers([]); }
-    } catch { setError("تعذّر تحميل القبائل. حاول مرة أخرى."); }
+    } catch { setError("تعذّر فتح سجل الأساطيل."); }
     finally { setLoading(false); }
   }, [player]);
 
@@ -92,8 +92,8 @@ export function TribesPage() {
             <ArrowRight />
           </Link>
           <div>
-            <span>تحالفات البحر</span>
-            <h1>القبائل</h1>
+            <span>رايات الخليج</span>
+            <h1>مجلس الأساطيل</h1>
           </div>
           <Swords />
         </header>
@@ -110,9 +110,9 @@ export function TribesPage() {
                 <img src={emblemSrc(myTribe.emblem)} alt="" className="tribe-hero-emblem" />
                 <div className="tribe-hero-text">
                   <h2>{myTribe.name}</h2>
-                  <p>{myTribe.motto || "قبيلة بلا شعار… بعد"}</p>
+                  <p>{myTribe.motto || "أسطول ينتظر نقش رايته"}</p>
                   <span className="tribe-rank">
-                    <Shield className="h-3.5 w-3.5" /> رتبتك: {rankLabel[(mine?.rank ?? "member")] ?? (mine?.rank ?? "member")} · مساهمتك{" "}
+                    <Shield className="h-3.5 w-3.5" /> منزلتك: {rankLabel[(mine?.rank ?? "member")] ?? (mine?.rank ?? "member")} · غنيمتك للخزينة{" "}
                     {mine?.contribution ?? 0}
                   </span>
                 </div>
@@ -132,8 +132,8 @@ export function TribesPage() {
               <section className="tribe-hero tribe-hero-empty">
                 <Flag className="h-8 w-8 text-game-gold" />
                 <div className="tribe-hero-text">
-                  <h2>لا قبيلة لك بعد</h2>
-                  <p>انضم لقبيلة من القائمة أو أسّس قبيلتك وقُد أسطولك.</p>
+                  <h2>لا راية فوق صاريك</h2>
+                  <p>ارفع راية أسطول قائم أو انقش رايتك وجمّع ربابنتك.</p>
                 </div>
                 <Button variant="ghost" type="button" className="tribe-create" onClick={() => setCreating((v) => !v)} disabled={!player}>
                   <Plus className="h-4 w-4" /> تأسيس قبيلة
@@ -143,8 +143,8 @@ export function TribesPage() {
 
             {creating && !myTribe && (
               <section className="tribe-form">
-                <input value={name} onChange={(e) => setName(e.target.value)} maxLength={20} aria-label="اسم القبيلة" placeholder="اسم القبيلة" />
-                <input value={motto} onChange={(e) => setMotto(e.target.value)} maxLength={80} aria-label="شعار القبيلة" placeholder="شعار القبيلة" />
+                <input value={name} onChange={(e) => setName(e.target.value)} maxLength={20} aria-label="اسم الأسطول" placeholder="اسم الأسطول" />
+                <input value={motto} onChange={(e) => setMotto(e.target.value)} maxLength={80} aria-label="نقش الراية" placeholder="نقش الراية" />
                 <div className="tribe-emblems">
                   {EMBLEMS.map((e) => (
                     <Button variant="ghost"
@@ -199,7 +199,7 @@ export function TribesPage() {
                       <li key={m.id}>
                         <CaptainAvatar seed={m.players?.avatar_index ?? 0} className="tribe-member-face" />
                         <div>
-                          <strong>{m.players?.name ?? "قبطان"}</strong>
+                          <strong>{m.players?.name ?? "ربّان"}</strong>
                           <small>
                             {rankLabel[m.rank] ?? m.rank} · {m.contribution} نقطة
                           </small>
@@ -214,7 +214,7 @@ export function TribesPage() {
                             }}
                           >
                             <Crown className="h-3.5 w-3.5" />
-                            {m.rank === "member" ? "ترقية" : "تخفيض"}
+                            {m.rank === "member" ? "رفع المنزلة" : "خفض المنزلة"}
                           </Button>
                         )}
                       </li>
@@ -252,7 +252,7 @@ export function TribesPage() {
                     )}
                   </li>
                 ))}
-                {tribes.length === 0 && <p className="tribe-empty">لا توجد قبائل بعد — كن أول مؤسس.</p>}
+                {tribes.length === 0 && <p className="tribe-empty">البحر خالٍ من الرايات — انقش أولها.</p>}
               </ul>
             </section>
           </>
