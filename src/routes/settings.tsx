@@ -11,7 +11,7 @@ import { isArtworkAdmin } from "@/lib/artwork";
 import { isMuted, setMuted, startAmbient } from "@/lib/sound";
 
 export const Route = createFileRoute("/settings")({
-  head: () => ({ meta: [{ title: "إعدادات القبطان — Island Bay" }, { name: "description", content: "إعدادات حساب القبطان والصوت والحركة في خليج الجزيرة." }, { property: "og:title", content: "إعدادات القبطان — Island Bay" }, { property: "og:description", content: "تحكم في حسابك وتجربة اللعب." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" }] }),
+  head: () => ({ meta: [{ title: "إعدادات القبطان — خليج القراصنة" }, { name: "description", content: "إعدادات حساب القبطان والصوت والحركة في خليج القراصنة." }, { property: "og:title", content: "إعدادات القبطان — خليج القراصنة" }, { property: "og:description", content: "تحكم في حسابك وتجربة اللعب." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" }] }),
   component: SettingsPage,
 });
 

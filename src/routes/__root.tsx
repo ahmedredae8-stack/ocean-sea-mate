@@ -78,10 +78,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
-      { title: "خليج الجزيرة — Island Bay" },
+      { title: "خليج القراصنة" },
       { name: "description", content: "لعبة قرية الخليج: بحر متحرك وخلفيات عالمية مجانية." },
-      { name: "author", content: "Island Bay" },
-      { property: "og:title", content: "خليج الجزيرة — Island Bay" },
+      { name: "author", content: "خليج القراصنة" },
+      { property: "og:title", content: "خليج القراصنة" },
       { property: "og:description", content: "لعبة قرية الخليج: بحر متحرك وخلفيات عالمية مجانية." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

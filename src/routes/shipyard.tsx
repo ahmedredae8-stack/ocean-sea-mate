@@ -12,10 +12,10 @@ import { playSfx } from "@/lib/sound";
 export const Route = createFileRoute("/shipyard")({
   head: () => ({
     meta: [
-      { title: "مصنع السفن — Island Bay" },
+      { title: "حوض البناء الملكي — خليج القراصنة" },
       { name: "description", content: "اشترِ وطوّر سفنك: أرسلها للميناء أو للإبحار أو اختر طاقمها." },
-      { property: "og:title", content: "مصنع السفن — Island Bay" },
-      { property: "og:description", content: "كتالوج السفن والترقيات وإدارة الطواقم داخل خليج الجزيرة." },
+      { property: "og:title", content: "حوض البناء الملكي — خليج القراصنة" },
+      { property: "og:description", content: "كتالوج السفن والترقيات وإدارة الطواقم داخل خليج القراصنة." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -52,7 +52,7 @@ export function Shipyard() {
         <Link to="/" aria-label="رجوع" className="rounded-xl bg-black/40 p-2 transition hover:bg-black/60">
           <ArrowRight className="h-5 w-5" />
         </Link>
-        <h1 className="text-lg font-black text-[var(--gold)] drop-shadow">مصنع السفن</h1>
+        <h1 className="text-lg font-black text-[var(--gold)] drop-shadow">حوض البناء الملكي</h1>
       </header>
 
       <div className="flex gap-2 overflow-x-auto px-4 py-3">

@@ -14,9 +14,9 @@ import { DemoCommunity } from "@/components/DemoCommunity";
 export const Route = createFileRoute("/chat")({
   head: () => ({
     meta: [
-      { title: "دردشة الخليج — Island Bay" },
-      { name: "description", content: "دردشة مباشرة بين لاعبي خليج الجزيرة: غرفة عامة ومحادثات خاصة مع الأصدقاء." },
-      { property: "og:title", content: "دردشة الخليج — Island Bay" },
+      { title: "لاسلكي المرفأ — خليج القراصنة" },
+      { name: "description", content: "دردشة مباشرة بين لاعبي خليج القراصنة: غرفة عامة ومحادثات خاصة مع الأصدقاء." },
+      { property: "og:title", content: "لاسلكي المرفأ — خليج القراصنة" },
       { property: "og:description", content: "غرفة عامة ومحادثات خاصة بين قباطنة الخليج، بالوقت الحقيقي." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -32,7 +32,7 @@ export function ChatPage() {
   const [demo, setDemo] = useState(false);
 
   if (loading) return <Splash />;
-  return <Shell><nav className="community-mode" aria-label="نوع المجتمع"><Button variant="ghost" aria-pressed={!demo} onClick={() => setDemo(false)}>اللاعبون</Button><Button variant="ghost" aria-pressed={demo} onClick={() => setDemo(true)}>مجتمع تجريبي</Button></nav><div className="community-content">{demo ? <DemoCommunity /> : player ? <ChatRoom me={player} /> : <SignInNotice />}</div></Shell>;
+  return <Shell><nav className="community-mode" aria-label="نوع المجتمع"><Button variant="ghost" aria-pressed={!demo} onClick={() => setDemo(false)}>الربابنة</Button><Button variant="ghost" aria-pressed={demo} onClick={() => setDemo(true)}>مرفأ المحاكاة</Button></nav><div className="community-content">{demo ? <DemoCommunity /> : player ? <ChatRoom me={player} /> : <SignInNotice />}</div></Shell>;
 }
 
 function Shell({ children }: { children: React.ReactNode }) {
@@ -171,7 +171,7 @@ function ChatRoom({ me }: { me: Player }) {
       recipient_id: active === PUBLIC ? null : active,
       body: body.slice(0, 500),
     });
-    if (error) { setText(body); setSendError("تعذّر إرسال الرسالة. حاول مرة أخرى."); }
+    if (error) { setText(body); setSendError("انقطع البث، أعد الإرسال."); }
     setSending(false);
     inputRef.current?.focus();
   };
@@ -188,14 +188,14 @@ function ChatRoom({ me }: { me: Player }) {
           <Link to="/" className="rounded-lg p-2 text-hud-subtle transition hover:bg-hud-surface hover:text-hud-text" aria-label="رجوع للقرية">
             <ArrowRight className="h-5 w-5" />
           </Link>
-          <span className="text-sm font-bold tracking-wide text-[var(--gold)]">دردشة الخليج</span>
+          <span className="text-sm font-bold tracking-wide text-[var(--gold)]">لاسلكي المرفأ</span>
         </div>
 
         <nav className="space-y-1 px-3 pb-4">
           <ConversationRow
             active={active === PUBLIC && section === "public"}
-            title="الغرفة العامة"
-            subtitle="كل القباطنة"
+            title="موجة الخليج"
+            subtitle="بثّ لكل الأشرعة"
             onClick={() => {
               setActive(PUBLIC);
               setSection("public");
@@ -204,14 +204,14 @@ function ChatRoom({ me }: { me: Player }) {
             icon={<Globe2 className="h-5 w-5" />}
           />
 
-          <p className="px-2 pb-1 pt-4 text-xs font-semibold text-hud-subtle">الأصدقاء</p>
-          {friends.length === 0 && <p className="text-sm text-hud-subtle">لا توجد محادثات خاصة بعد</p>}
+          <p className="px-2 pb-1 pt-4 text-xs font-semibold text-hud-subtle">حمام الزاجل</p>
+          {friends.length === 0 && <p className="text-sm text-hud-subtle">لم تُطلق حمامة زاجل بعد</p>}
           {friends.map((f) => (
             <ConversationRow
               key={f.id}
               active={active === f.id}
               title={f.name}
-              subtitle={isOnline(f.last_seen) ? "متصل الآن" : "غير متصل"}
+              subtitle={isOnline(f.last_seen) ? "على الموجة" : "خارج البث"}
               online={isOnline(f.last_seen)}
               onClick={() => {
                 setActive(f.id);
@@ -228,7 +228,7 @@ function ChatRoom({ me }: { me: Player }) {
             <Avatar name={me.name} gold />
             <div className="min-w-0">
               <p className="truncate text-sm font-semibold">{me.name}</p>
-              <p className="text-xs text-hud-aqua">متصل</p>
+              <p className="text-xs text-hud-aqua">على الموجة</p>
             </div>
           </div>
         </div>
@@ -245,11 +245,11 @@ function ChatRoom({ me }: { me: Player }) {
       {/* Conversation */}
       <section className="chat-conversation">
         <nav className="dock-tabs" aria-label="قنوات الدردشة">
-          {([ ["friends", "الأصدقاء", Users], ["public", "العام", Globe2], ["tribe", "القبيلة", Shield] ] as const).map(([id, label, Icon]) => (
+          {([ ["friends", "الزاجل", Users], ["public", "الموجة", Globe2], ["tribe", "الأسطول", Shield] ] as const).map(([id, label, Icon]) => (
             <Button key={id} variant="ghost" className={section === id ? "dock-tab active" : "dock-tab"} onClick={() => { setSection(id); if (id === "public") setActive(PUBLIC); if (id === "friends") setSidebar(true); else setSidebar(false); }}><Icon size={16} />{label}</Button>
           ))}
         </nav>
-        {section === "tribe" ? <div className="dock-empty"><Shield size={42} /><strong>{tribeMember ? "دردشة القبيلة" : "لم تنضم إلى قبيلة بعد"}</strong><span>{tribeMember ? "قناة القبيلة غير متاحة بعد." : "انضم إلى قبيلة من نافذتها أولاً."}</span></div> : <>
+        {section === "tribe" ? <div className="dock-empty"><Shield size={42} /><strong>{tribeMember ? "شفرة الأسطول" : "لست في أسطول بعد"}</strong><span>{tribeMember ? "قناة القبيلة غير متاحة بعد." : "انضم إلى قبيلة من نافذتها أولاً."}</span></div> : <>
         <header className="flex items-center gap-3 border-b border-hud-edge px-4 py-3 backdrop-blur">
           <Button variant="ghost"
             className="chat-menu-toggle"
@@ -260,13 +260,13 @@ function ChatRoom({ me }: { me: Player }) {
           </Button>
           {activeFriend ? <Avatar name={activeFriend.name} /> : <div className="rounded-lg bg-hud-surface p-2"><Globe2 className="h-5 w-5" /></div>}
           <div className="min-w-0">
-            <h1 className="truncate font-bold">{activeFriend ? activeFriend.name : "الغرفة العامة"}</h1>
+            <h1 className="truncate font-bold">{activeFriend ? activeFriend.name : "موجة الخليج"}</h1>
             <p className="text-xs text-hud-subtle">
               {activeFriend
                 ? isOnline(activeFriend.last_seen)
-                  ? "متصل الآن"
-                  : "غير متصل"
-                : "محادثة مفتوحة لكل اللاعبين"}
+                  ? "على الموجة"
+                  : "خارج البث"
+                : "بثّ مفتوح يسمعه كل ربّان"}
             </p>
           </div>
         </header>
@@ -316,7 +316,7 @@ function ChatRoom({ me }: { me: Player }) {
               maxLength={500}
               onChange={(e) => setText(e.target.value)}
               aria-label="نص الرسالة"
-              placeholder={activeFriend ? `اكتب إلى ${activeFriend.name}...` : "اكتب رسالة للجميع..."}
+              placeholder={activeFriend ? `أرسل زاجلاً إلى ${activeFriend.name}…` : "بُثّ نداءك على الموجة…"}
               className="min-w-0 flex-1 bg-transparent py-2 text-sm outline-none placeholder:text-hud-subtle"
             />
             <Button variant="ghost"

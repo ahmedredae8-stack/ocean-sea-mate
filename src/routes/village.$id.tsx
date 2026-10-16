@@ -8,9 +8,9 @@ import { currentPhase, getScene, getTheme } from "@/lib/themes";
 export const Route = createFileRoute("/village/$id")({
   head: () => ({
     meta: [
-      { title: "زيارة قرية صديق — Island Bay" },
-      { name: "description", content: "تجوّل في قرية صديقك داخل خليج الجزيرة وشاهد خلفيته وحالته." },
-      { property: "og:title", content: "زيارة قرية صديق — Island Bay" },
+      { title: "زيارة قرية صديق — خليج القراصنة" },
+      { name: "description", content: "تجوّل في قرية صديقك داخل خليج القراصنة وشاهد خلفيته وحالته." },
+      { property: "og:title", content: "زيارة قرية صديق — خليج القراصنة" },
       { property: "og:description", content: "شاهد قرية صديقك وخلفيته المختارة وحالة اتصاله." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

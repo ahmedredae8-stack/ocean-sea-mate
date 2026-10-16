@@ -11,9 +11,9 @@ import { playSfx } from "@/lib/sound";
 export const Route = createFileRoute("/friends")({
   head: () => ({
     meta: [
-      { title: "الأصدقاء — Island Bay" },
-      { name: "description", content: "أضف أصدقاء في خليج الجزيرة، اقبل الطلبات، شاهد من متصل الآن وزُر قراهم." },
-      { property: "og:title", content: "الأصدقاء — Island Bay" },
+      { title: "الأصدقاء — خليج القراصنة" },
+      { name: "description", content: "أضف أصدقاء في خليج القراصنة، اقبل الطلبات، شاهد من متصل الآن وزُر قراهم." },
+      { property: "og:title", content: "الأصدقاء — خليج القراصنة" },
       { property: "og:description", content: "طلبات صداقة، حالة الاتصال، وزيارة قرى الأصدقاء." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
