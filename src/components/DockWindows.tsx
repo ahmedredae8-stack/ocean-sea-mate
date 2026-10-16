@@ -60,5 +60,5 @@ export function AlertsWindow() {
 }
 
 export function EnemiesWindow() {
-  return <div className="dock-content"><div className="dock-section-heading"><Skull size={20} /><strong>لوح المطلوبين</strong></div><EmptyState icon={Users} title="لوح المطلوبين فارغة" detail="كل قرصان يجرؤ على نهب صيدك تُعلَّق رايته هنا للثأر." /></div>;
+  return <div className="dock-content"><div className="dock-section-heading"><Skull size={20} /><strong>لوح المطلوبين</strong></div><EmptyState icon={Users} title="لا رايات سوداء معلّقة" detail="كل قرصان يجرؤ على نهب صيدك تُعلَّق رايته هنا للثأر." /></div>;
 }
