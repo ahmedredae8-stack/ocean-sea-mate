@@ -2588,3 +2588,5 @@
 .arsenal .mk-ship.is-mine { border-color: var(--gb-sea); box-shadow: 0 0 0 1px var(--gb-sea); }
 .arsenal .mk-ship button { border-radius: 10px; color: var(--gb-ink); background: linear-gradient(180deg, var(--gb-bronze-hi), var(--gb-bronze)); }
 .arsenal .mk-ship-specs div { background: oklch(1 0 0 / 0.05); }
+.legend-crest h1 { display: grid; line-height: 1.15; gap: 0.1rem; margin: 0.4rem 0 0.6rem; }
+.legend-crest h1 em { font-size: 1.15em; }

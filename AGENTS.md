@@ -20,3 +20,4 @@
 - Render the store ship tab through TradingFloor, shared with the map market, so catalog and ownership cannot diverge.
 - Keep fishing duration/catch caps in fishingTrip and cancel per-boat timers on recall so late transitions cannot restart a returned trip.
 - Keep simulated community conversations separate from real messages and player records so demo activity never impersonates real users.
+- Render every in-game window, including the store, through the shared cabin shell (bottom-docked, one fixed size); mixed shells caused inconsistent window sizes.
