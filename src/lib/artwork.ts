@@ -57,6 +57,17 @@ async function fetchMap(): Promise<Record<string, string>> {
   return map;
 }
 
+/** Latest admin-published art URLs, for the intro to warm before the bay opens. */
+export async function latestArtworkUrls(): Promise<string[]> {
+  try {
+    const map = await fetchMap();
+    window.dispatchEvent(new CustomEvent(ARTWORK_UPDATED));
+    return Object.values(map);
+  } catch {
+    return Object.values(readCache());
+  }
+}
+
 /** True once admin art is known (cached or fetched), so views can hold back bundled art. */
 export function useArtworkMap() {
   return useArtwork().map;
