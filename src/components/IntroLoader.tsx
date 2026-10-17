@@ -4,6 +4,7 @@ import introArt from "@/assets/intro-legend.jpg";
 import { hulls } from "@/lib/fleetCatalog";
 import { themes } from "@/lib/themes";
 import { playSfx } from "@/lib/sound";
+import { latestArtworkUrls } from "@/lib/artwork";
 
 /** The four calls of the bosun before the ship leaves the golden bay. */
 const CALLS = ["فكّ الحبال", "نشر الأشرعة", "قراءة النجوم", "إلى الخليج الذهبي"];
@@ -28,12 +29,21 @@ export function IntroLoader({ onDone }: { onDone: () => void }) {
     let alive = true;
     const urls = [...new Set([...themes.flatMap((t) => [t.day.poster, t.night.poster]), ...hulls].filter(Boolean))];
     let done = 0;
-    urls.forEach((u) => void warm(u).then(() => { done++; }));
-    const guard = window.setTimeout(() => { done = urls.length; }, GUARD_MS);
+    let artKnown = false;
+    const add = (list: string[]) => list.forEach((u) => void warm(u).then(() => { done++; }));
+    add(urls);
+    // Ships and store art edited in the admin studio load with the intro too.
+    void latestArtworkUrls().then((art) => {
+      const fresh = art.filter((u) => u && !urls.includes(u));
+      urls.push(...fresh);
+      add(fresh);
+      artKnown = true;
+    });
+    const guard = window.setTimeout(() => { done = urls.length; artKnown = true; }, GUARD_MS);
     const t0 = performance.now();
     let raf = 0;
     const tick = () => {
-      const real = urls.length ? done / urls.length : 1;
+      const real = urls.length && artKnown ? done / urls.length : 0;
       const time = Math.min(1, (performance.now() - t0) / MIN_MS);
       setProgress(Math.min(real, time) * 100);
       if (real >= 1 && time >= 1) {

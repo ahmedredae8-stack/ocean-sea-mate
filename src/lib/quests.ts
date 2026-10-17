@@ -12,10 +12,10 @@ export type Quest = {
 };
 
 export const QUESTS: Quest[] = [
-  { id: "catch", title: "عقد الشباك: خمس رميات", hint: "أنزل الشباك من الميناء أو أثناء رحلة صيد", goal: 5, gems: 15, icon: "https://project--356242e8-144f-42b3-8292-474399c324ac.lovable.app/__l5e/assets-v1/21f152aa-6da2-4e28-9df2-90d8692a372d/net.png" },
-  { id: "sell", title: "عقد التاجر: ثلاث صفقات", hint: "صرّف حمولتك حين يعلو سعر المزاد", goal: 3, gems: 20, icon: "https://project--356242e8-144f-42b3-8292-474399c324ac.lovable.app/__l5e/assets-v1/d40f7c1c-8c7f-47ec-89a0-120eaa992bde/fish-tuna.png" },
-  { id: "crew", title: "عقد التجنيد: طاقمان", hint: "ضمّ ملّاحين أو دليلاً إلى سطح سفينتك", goal: 2, gems: 25, icon: "https://project--356242e8-144f-42b3-8292-474399c324ac.lovable.app/__l5e/assets-v1/f29ed123-2209-4423-a9f2-f05adfb07583/act-crew.png" },
-  { id: "upgrade", title: "عقد الحوض: تعزيز هيكل", hint: "عزّز أي سفينة في حوض البناء الملكي", goal: 1, gems: 40, icon: "https://project--356242e8-144f-42b3-8292-474399c324ac.lovable.app/__l5e/assets-v1/aeaa94a5-0adf-4b22-ae52-9e1740a462a3/act-dock.png" },
+  { id: "catch", title: "ارمِ الشبكة 5 مرات", hint: "أرسل قاربك للصيد", goal: 5, gems: 15, icon: "https://project--356242e8-144f-42b3-8292-474399c324ac.lovable.app/__l5e/assets-v1/21f152aa-6da2-4e28-9df2-90d8692a372d/net.png" },
+  { id: "sell", title: "بِع السمك 3 مرات", hint: "من سوق السمك", goal: 3, gems: 20, icon: "https://project--356242e8-144f-42b3-8292-474399c324ac.lovable.app/__l5e/assets-v1/d40f7c1c-8c7f-47ec-89a0-120eaa992bde/fish-tuna.png" },
+  { id: "crew", title: "وظّف 2 من الطاقم", hint: "من زر الطاقم فوق القارب", goal: 2, gems: 25, icon: "https://project--356242e8-144f-42b3-8292-474399c324ac.lovable.app/__l5e/assets-v1/f29ed123-2209-4423-a9f2-f05adfb07583/act-crew.png" },
+  { id: "upgrade", title: "طوّر سفينة واحدة", hint: "من المتجر", goal: 1, gems: 40, icon: "https://project--356242e8-144f-42b3-8292-474399c324ac.lovable.app/__l5e/assets-v1/aeaa94a5-0adf-4b22-ae52-9e1740a462a3/act-dock.png" },
 ];
 
 export type QuestState = { day: string; progress: Record<QuestId, number>; claimed: QuestId[]; gems: number };

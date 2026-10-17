@@ -27,12 +27,11 @@ import eiffelNightImg from "@/assets/scenes/eiffel-night.jpg.asset.json";
 import eiffelBurnedVid from "@/assets/scenes/eiffel-burned.mp4.asset.json";
 import eiffelBurnedImg from "@/assets/scenes/eiffel-burned.jpg.asset.json";
 
-/** Scene media is owned by this project's asset storage. */
-const CDN_ORIGIN = "https://sea-tales-backend-buddy.lovable.app";
+/** Scene media lives in the asset store of the project that uploaded it; always use its absolute origin so any host (Vercel included) can load it. */
+const CDN_ORIGIN = "https://project--877e84db-45fc-44cc-964c-743dc853bab8.lovable.app";
 
 function cdn(url: string) {
   if (!url.startsWith("/__l5e/")) return url;
-  if (typeof window !== "undefined" && window.location.hostname.endsWith("lovable.app")) return url;
   return CDN_ORIGIN + url;
 }
 
