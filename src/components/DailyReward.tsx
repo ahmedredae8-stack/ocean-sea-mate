@@ -60,8 +60,8 @@ export function DailyReward() {
         >
           <X className="h-4 w-4" />
         </button>
-        <h2 className="daily-title">مكافأة الدخول اليومي</h2>
-        <p className="mb-3 text-center text-xs text-white/60">يومك {streak} من 7 — لا تفوّت يومًا!</p>
+        <h2 className="daily-title">هدية اليوم</h2>
+        <p className="mb-3 text-center text-xs text-white/60">اليوم {streak} من 7 — ارجع بكرة لهدية أكبر</p>
         <ul className="grid grid-cols-4 gap-2">
           {DAYS.map((r) => (
             <li key={r.d} className={`daily-cell ${r.d < streak ? "daily-cell-past" : ""} ${r.d === streak ? "daily-cell-now" : ""}`}>
