@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
-import { Bell, Crown, Fish, Shield, Skull, Swords, Trophy, Users } from "lucide-react";
+import { Bell, Crown, Fish, MessageCircle, Rocket, Search, Shield, Skull, Swords, Trophy, Users } from "lucide-react";
+import { playSfx } from "@/lib/sound";
+import { hulls } from "@/lib/fleetCatalog";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { CaptainAvatar } from "@/components/GameSprite";
@@ -12,27 +14,69 @@ import { GameSprite } from "@/components/GameSprite";
 
 type Ranking = "events" | "damage" | "fish" | "tribes";
 const boards = [
-  { id: "events" as const, label: "مواسم الغنائم", icon: Trophy },
-  { id: "damage" as const, label: "فرسان المدفعية", icon: Swords },
-  { id: "fish" as const, label: "صيادو الأعماق", icon: Fish },
-  { id: "tribes" as const, label: "أعتى الأساطيل", icon: Crown },
+  { id: "events" as const, label: "الأعلى نقاطاً", icon: Trophy },
+  { id: "damage" as const, label: "أقوى هجوم", icon: Swords },
+  { id: "fish" as const, label: "أكثر صيداً", icon: Fish },
+  { id: "tribes" as const, label: "أقوى قبيلة", icon: Crown },
 ];
 
-export function RankingsWindow() {
+type Row = Pick<Player, "id" | "name" | "score" | "avatar_index">;
+
+export function RankingsWindow({ me = null, onMessage }: { me?: string | null; onMessage?: (id: string) => void }) {
   const [board, setBoard] = useState<Ranking>("events");
-  const [players, setPlayers] = useState<Pick<Player, "id" | "name" | "score" | "avatar_index">[]>([]);
+  const [players, setPlayers] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
+  const [query, setQuery] = useState("");
+  const [picked, setPicked] = useState<Row | null>(null);
+  const [attack, setAttack] = useState<Row | null>(null);
   useEffect(() => {
     let active = true;
-    void supabase.from("players").select("id,name,score,avatar_index").order("score", { ascending: false }).limit(25).then(({ data }) => {
-      if (active) { setPlayers(data ?? []); setLoading(false); }
-    });
-    return () => { active = false; };
-  }, []);
+    setLoading(true);
+    const q = query.trim();
+    const base = supabase.from("players").select("id,name,score,avatar_index");
+    const req = q ? base.ilike("name", `%${q.replace(/[%_]/g, "")}%`).limit(25) : base.order("score", { ascending: false }).limit(25);
+    const t = window.setTimeout(() => void req.then(({ data }) => { if (active) { setPlayers(data ?? []); setLoading(false); } }), q ? 300 : 0);
+    return () => { active = false; window.clearTimeout(t); };
+  }, [query]);
+  const searching = query.trim().length > 0;
   return <div className="dock-content">
-    <nav className="dock-tabs dock-tabs-wrap" aria-label="ميادين الديوان">{boards.map(({ id, label, icon: Icon }) => <Button key={id} variant="ghost" className={board === id ? "dock-tab active" : "dock-tab"} onClick={() => setBoard(id)}><Icon size={16} />{label}</Button>)}</nav>
-    <div className="dock-section-heading"><Trophy size={20} /><strong>{boards.find((item) => item.id === board)?.label}</strong></div>
-    {board !== "events" ? <EmptyState icon={Trophy} title="الديوان لم يُدوَّن بعد" detail="تُنقش الأسماء هنا حين تُحسم أول منازلة في هذا الميدان." /> : loading ? <p className="dock-loading">يُفتح ديوان الأساطير…</p> : players.length ? <ol className="ranking-list">{players.map((player, i) => <li key={player.id}><b className="ranking-position">{String(i + 1).padStart(2, "0")}</b><CaptainAvatar seed={player.avatar_index ?? 0} className="ranking-avatar" /><strong>{player.name}</strong><span>{(player.score ?? 0).toLocaleString("ar")} مجد</span></li>)}</ol> : <EmptyState icon={Trophy} title="لم يُنقش اسم أي ربّان بعد" detail="أبحر واغنم ليُخلَّد اسمك في الديوان." />}
+    <label className="captain-search"><Search size={16} /><input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="اكتب اسم القبطان…" dir="auto" /></label>
+    {!searching && <nav className="pill-tabs" aria-label="الترتيب">{boards.map(({ id, label, icon: Icon }) => <button type="button" key={id} className={board === id ? "pill-tab on" : "pill-tab"} onClick={() => setBoard(id)}><Icon size={14} />{label}</button>)}</nav>}
+    {!searching && board !== "events" ? <EmptyState icon={Trophy} title="لا يوجد ترتيب بعد" detail="سيظهر هنا بعد أول معارك ورحلات صيد حقيقية." />
+      : loading ? <p className="dock-loading">جاري البحث…</p>
+      : players.length ? <ol className="ranking-list">{players.map((p, i) => <li key={p.id} className={picked?.id === p.id ? "is-picked" : ""}>
+          <button type="button" className="ranking-row" onClick={() => setPicked(picked?.id === p.id ? null : p)}>
+            <b className="ranking-position">{searching ? "•" : i + 1}</b><CaptainAvatar seed={p.avatar_index ?? 0} className="ranking-avatar" /><strong>{p.name}{p.id === me && " (أنت)"}</strong><span>{(p.score ?? 0).toLocaleString("ar")} نقطة</span>
+          </button>
+          {picked?.id === p.id && p.id !== me && <div className="captain-actions">
+            <button type="button" className="act-btn act-talk" onClick={() => onMessage?.(p.id)}><MessageCircle size={16} />راسله</button>
+            <button type="button" className="act-btn act-hit" onClick={() => setAttack(p)}><Rocket size={16} />هاجم سفينته</button>
+          </div>}
+        </li>)}</ol>
+      : <EmptyState icon={Users} title={searching ? "ما لقينا أحد بهذا الاسم" : "لا يوجد قباطنة بعد"} detail={searching ? "جرّب اسماً آخر." : "كن أول من يبحر."} />}
+    {attack && <AttackScene target={attack} onDone={() => setAttack(null)} />}
+  </div>;
+}
+
+/** Rocket volley against a rival's hull with shield flare. Visual only until battle records exist. */
+function AttackScene({ target, onDone }: { target: Row; onDone: () => void }) {
+  const [stage, setStage] = useState<"fly" | "hit" | "end">("fly");
+  useEffect(() => {
+    playSfx("click", 0.9);
+    const a = window.setTimeout(() => { setStage("hit"); playSfx("click", 1); }, 1400);
+    const b = window.setTimeout(() => setStage("end"), 2600);
+    return () => { window.clearTimeout(a); window.clearTimeout(b); };
+  }, []);
+  return <div className={`attack-scene stage-${stage}`} role="dialog" aria-label={`هجوم على ${target.name}`}>
+    <div className="attack-sky" aria-hidden="true">
+      <span className="rocket r1" /><span className="rocket r2" /><span className="rocket r3" />
+      <img className="attack-ship" src={hulls[0]} alt="" />
+      <span className="attack-shield" /><span className="attack-blast" />
+    </div>
+    <div className="attack-copy">
+      <strong>{stage === "fly" ? "الصواريخ في الطريق…" : stage === "hit" ? "اصطدمت بالدرع!" : `انتهى الهجوم على ${target.name}`}</strong>
+      {stage === "end" && <><span>هذا عرض تجريبي — المعارك الحقيقية والغنائم تُفعَّل قريباً.</span><button type="button" className="act-btn act-talk" onClick={onDone}>رجوع</button></>}
+    </div>
   </div>;
 }
 
