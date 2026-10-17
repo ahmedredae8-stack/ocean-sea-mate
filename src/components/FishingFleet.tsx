@@ -172,7 +172,11 @@ export function FishingFleet({ themeId, themeName }: { themeId: string; themeNam
         ].filter(Boolean).join(" ");
         return (
           <div key={ship.id} className={laneClasses} style={style}>
-            {trip && !busy && <span className="ship-catch-status">{ship.state === "full" ? "ممتلئة · العودة للميناء" : `الصيد ${Math.round(progress * 100)}٪`}</span>}
+            <div className={`ship-gauge ${ship.state === "full" ? "is-full" : ""}`} aria-label={`السفينة ${ship.id}: ${trip ? `الشبكة ${Math.round(progress * 100)}٪` : "في الميناء"}`}>
+              <span className="ship-gauge-name">قارب {ship.id}<b>مستوى {fleetCatalog.find((s) => s.id === catalogId)?.tier ?? 1}</b></span>
+              <span className="ship-gauge-track"><i style={{ width: `${trip ? Math.round(progress * 100) : 0}%` }} /></span>
+              <span className="ship-gauge-text">{!trip ? "جاهز للصيد" : ship.state === "full" ? "الشبكة ممتلئة — ارجع" : busy ? "في طريق العودة" : `يصطاد ${Math.round(progress * 100)}٪`}</span>
+            </div>
             {selected === ship.id && !busy && (
               <div className="ship-actions" role="menu" aria-label={`أوامر السفينة ${ship.id}`}>
                 <Button variant="ghost" role="menuitem" className="ship-action" onClick={() => sail(ship)} title={ship.state === "docked" ? "الذهاب للصيد" : "العودة للميناء"}>
@@ -232,20 +236,27 @@ export function FishingFleet({ themeId, themeName }: { themeId: string; themeNam
         onPoseChange={setPoseOverride}
       />
 
-      {haulResult && (
-        <div className="fleet-modal" role="dialog" aria-modal="true" aria-label="نتيجة الصيد" onClick={() => setHaulResult(null)}>
-          <section className="haul-panel" dir="rtl" onClick={(event) => event.stopPropagation()}>
-            <h2>نتيجة الصيد</h2>
-            <div className="haul-board">
-              {haulResult.length === 0 && <p className="mk-empty">عادت السفينة قبل جمع أي صيد</p>}
-              {haulResult.map((line) => (
-                <p key={line.fish.id} className="haul-line"><img src={line.fish.img} alt="" /><span>{line.fish.name}</span><b>X{line.qty.toLocaleString("en-US")}</b></p>
-              ))}
-            </div>
-            <Button className="haul-ok" onClick={() => setHaulResult(null)}>OK</Button>
-          </section>
-        </div>
-      )}
+      {haulResult && (() => {
+        const total = haulResult.reduce((s, l) => s + l.qty, 0);
+        const value = haulResult.reduce((s, l) => s + l.qty * l.fish.base, 0);
+        return (
+          <div className="fleet-modal" role="dialog" aria-modal="true" aria-label="نتيجة الصيد" onClick={() => setHaulResult(null)}>
+            <section className="catch-report" dir="rtl" onClick={(event) => event.stopPropagation()}>
+              <span className="catch-report-seal" aria-hidden="true">⚓</span>
+              <h2>رجع القارب!</h2>
+              <p className="catch-report-sub">هذا ما اصطدته في هذه الرحلة</p>
+              <div className="catch-report-grid">
+                {haulResult.length === 0 && <p className="mk-empty">رجعت مبكراً، الشبكة فاضية</p>}
+                {haulResult.map((line) => (
+                  <div key={line.fish.id} className="catch-report-item"><img src={line.fish.img} alt="" /><span>{line.fish.name}</span><b>×{line.qty.toLocaleString("ar")}</b></div>
+                ))}
+              </div>
+              <div className="catch-report-sum"><span>كل السمك<b>{total.toLocaleString("ar")}</b></span><span>قيمته تقريباً<b>{value.toLocaleString("ar")} ذهب</b></span></div>
+              <Button className="catch-report-ok" onClick={() => setHaulResult(null)}>تمام، خزّنه</Button>
+            </section>
+          </div>
+        );
+      })()}
       {crewFor !== null && <CrewPanel shipId={crewFor} onClose={() => setCrewFor(null)} />}
       {sellFor !== null && (
         <div className="fleet-modal" role="dialog" aria-modal="true" aria-label="بيع السفينة" onClick={() => setSellFor(null)}>
