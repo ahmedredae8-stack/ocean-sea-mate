@@ -173,7 +173,7 @@ export function FishingFleet({ themeId, themeName }: { themeId: string; themeNam
         return (
           <div key={ship.id} className={laneClasses} style={style}>
             <div className={`ship-gauge ${ship.state === "full" ? "is-full" : ""}`} aria-label={`السفينة ${ship.id}: ${trip ? `الشبكة ${Math.round(progress * 100)}٪` : "في الميناء"}`}>
-              <span className="ship-gauge-name">قارب {ship.id}<b>مستوى {fleetCatalog.find((s) => s.id === catalogId)?.tier ?? 1}</b></span>
+              <span className="ship-gauge-name">قارب {ship.id}<b>مستوى {Math.max(1, fleetCatalog.findIndex((s) => s.id === catalogId) + 1)}</b></span>
               <span className="ship-gauge-track"><i style={{ width: `${trip ? Math.round(progress * 100) : 0}%` }} /></span>
               <span className="ship-gauge-text">{!trip ? "جاهز للصيد" : ship.state === "full" ? "الشبكة ممتلئة — ارجع" : busy ? "في طريق العودة" : `يصطاد ${Math.round(progress * 100)}٪`}</span>
             </div>
