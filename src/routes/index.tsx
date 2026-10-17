@@ -3,6 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Moon, Sun } from "lucide-react";
 
 import { IntroLoader } from "@/components/IntroLoader";
+import { NameGate } from "@/components/NameGate";
 import { GameStore } from "@/components/GameStore";
 import { AlertsWindow, EnemiesWindow, InventoryWindow, RankingsWindow } from "@/components/DockWindows";
 import { TribesPage } from "@/routes/tribes";
@@ -62,7 +63,7 @@ type Win = "chat" | "settings" | "fish" | "ship" | "trade-fish" | "trade-ship" |
 
 function Index() {
   const stageHost = useStageScale();
-  const { player } = usePlayer();
+  const { player, loading: playerLoading, setPlayer } = usePlayer();
   const [sound, setSound] = useState(true);
   const [intro, setIntro] = useState(true);
   const [themeId, setThemeId] = useState(defaultTheme.id);
@@ -202,32 +203,20 @@ function Index() {
        {shopOpen && <GameStore key={shopTab} initialTab={shopTab} activeId={themeId} onSelect={selectTheme} onClose={() => setShopOpen(false)} />}
 
       {questsOpen && (
-        <div className="daily-overlay" role="dialog" aria-label="المهام اليومية">
-          <div className="w-full max-w-md">
-            <QuestBoard />
-            <button
-              type="button"
-              onClick={() => {
-                playSfx("click", 0.6);
-                setQuestsOpen(false);
-              }}
-              className="daily-claim"
-            >
-              إغلاق
-            </button>
-          </div>
-        </div>
+        <GameWindow title="مهام اليوم" hint="خلّص المهمة واستلم جواهرك" onClose={() => setQuestsOpen(false)}>
+          <QuestBoard />
+        </GameWindow>
       )}
 
       {win === "chat" && (
-        <GameWindow title="الدردشة" hint="تحدث مع القباطنة" size="lg" onClose={() => setWin(null)}>
+        <GameWindow title="الرسائل" hint="كلّم القباطنة" size="lg" onClose={() => setWin(null)}>
           <ChatPage />
         </GameWindow>
       )}
-       {win === "stats" && <GameWindow title="سجل القباطنة" size="lg" onClose={() => setWin(null)}><RankingsWindow /></GameWindow>}
-       {win === "bag" && <GameWindow title="مخزن العتاد" size="lg" onClose={() => setWin(null)}><InventoryWindow player={player} /></GameWindow>}
-       {win === "alerts" && <GameWindow title="التنبيهات" size="lg" onClose={() => setWin(null)}><AlertsWindow /></GameWindow>}
-       {win === "enemies" && <GameWindow title="قائمة الأعداء" size="lg" onClose={() => setWin(null)}><EnemiesWindow /></GameWindow>}
+       {win === "stats" && <GameWindow title="سجل القباطنة" hint="ابحث عن أي قبطان، راسله أو هاجمه" size="lg" onClose={() => setWin(null)}><RankingsWindow me={player?.id ?? null} onMessage={() => open("chat")} /></GameWindow>}
+       {win === "bag" && <GameWindow title="مخزن العتاد" hint="كل ما اشتريته موجود هنا" size="lg" onClose={() => setWin(null)}><InventoryWindow player={player} /></GameWindow>}
+       {win === "alerts" && <GameWindow title="التنبيهات" hint="آخر ما حدث لأسطولك" size="lg" onClose={() => setWin(null)}><AlertsWindow /></GameWindow>}
+       {win === "enemies" && <GameWindow title="خصومي" hint="من هاجمك ومن هاجمته" size="lg" onClose={() => setWin(null)}><EnemiesWindow /></GameWindow>}
        {win === "tribe" && <GameWindow title="القبيلة" size="xl" onClose={() => setWin(null)}><TribesPage /></GameWindow>}
       {win === "settings" && (
         <GameWindow title="الإعدادات" size="md" onClose={() => setWin(null)}>
@@ -240,7 +229,13 @@ function Index() {
         </GameWindow>
       )}
 
-      {!intro && <DailyReward />}
+      {!intro && player && <DailyReward />}
+
+      {!intro && !playerLoading && !player && (
+        <div className="gate-overlay" role="dialog" aria-modal="true" aria-label="تسجيل الدخول">
+          <NameGate onReady={(p) => setPlayer(p)} />
+        </div>
+      )}
 
       {intro && <IntroLoader onDone={finishIntro} />}
       </main>
