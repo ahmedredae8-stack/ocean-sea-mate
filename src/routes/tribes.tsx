@@ -45,6 +45,7 @@ export function TribesPage() {
   const [members, setMembers] = useState<MemberRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
+  const [step, setStep] = useState(0);
   const [name, setName] = useState("");
   const [motto, setMotto] = useState("");
   const [emblem, setEmblem] = useState(EMBLEMS[0]?.id ?? "skull");
@@ -132,36 +133,36 @@ export function TribesPage() {
               <section className="tribe-hero tribe-hero-empty">
                 <Flag className="h-8 w-8 text-game-gold" />
                 <div className="tribe-hero-text">
-                  <h2>لا راية فوق صاريك</h2>
-                  <p>ارفع راية أسطول قائم أو انقش رايتك وجمّع ربابنتك.</p>
+                  <h2>أنت بدون مجموعة</h2>
+                  <p>انضم لمجموعة من القائمة بالأسفل، أو أنشئ مجموعتك في 3 خطوات.</p>
                 </div>
-                <Button variant="ghost" type="button" className="tribe-create" onClick={() => setCreating((v) => !v)} disabled={!player}>
-                  <Plus className="h-4 w-4" /> تأسيس قبيلة
+                <Button variant="ghost" type="button" className="tribe-create" onClick={() => { setCreating((v) => !v); setStep(0); }} disabled={!player}>
+                  <Plus className="h-4 w-4" /> مجموعة جديدة
                 </Button>
               </section>
             )}
 
             {creating && !myTribe && (
-              <section className="tribe-form">
-                <input value={name} onChange={(e) => setName(e.target.value)} maxLength={20} aria-label="اسم الأسطول" placeholder="اسم الأسطول" />
-                <input value={motto} onChange={(e) => setMotto(e.target.value)} maxLength={80} aria-label="نقش الراية" placeholder="نقش الراية" />
-                <div className="tribe-emblems">
+              <section className="tribe-form tribe-wizard">
+                <ol className="wizard-steps" aria-label="خطوات الإنشاء">
+                  {["الاسم", "العلم", "الشعار"].map((s, i) => <li key={s} className={i === step ? "on" : i < step ? "done" : ""}><b>{i + 1}</b>{s}</li>)}
+                </ol>
+                {step === 0 && <label className="wizard-field"><span>اختر اسماً لمجموعتك</span><input value={name} onChange={(e) => setName(e.target.value)} maxLength={20} placeholder="مثال: صقور الخليج" /></label>}
+                {step === 1 && <div className="tribe-emblems">
                   {EMBLEMS.map((e) => (
-                    <Button variant="ghost"
-                      key={e.id}
-                      type="button"
-                      aria-label={e.id}
-                      className={e.id === emblem ? "tribe-emblem tribe-emblem-on" : "tribe-emblem"}
-                      onClick={() => setEmblem(e.id)}
-                    >
+                    <Button variant="ghost" key={e.id} type="button" aria-label={e.id} className={e.id === emblem ? "tribe-emblem tribe-emblem-on" : "tribe-emblem"} onClick={() => setEmblem(e.id)}>
                       <img src={e.src} alt="" />
                     </Button>
                   ))}
-                </div>
+                </div>}
+                {step === 2 && <label className="wizard-field"><span>جملة قصيرة تعرّف مجموعتك (اختياري)</span><input value={motto} onChange={(e) => setMotto(e.target.value)} maxLength={80} placeholder="مثال: نصطاد معاً ونربح معاً" /></label>}
                 {error && <p className="auth-error">{error}</p>}
-                <Button variant="ghost" type="button" className="auth-submit" onClick={doCreate}>
-                  إنشاء القبيلة
-                </Button>
+                <div className="wizard-nav">
+                  {step > 0 && <Button variant="ghost" type="button" className="btn-plain" onClick={() => setStep(step - 1)}>السابق</Button>}
+                  {step < 2
+                    ? <Button variant="ghost" type="button" className="btn-bronze" disabled={step === 0 && name.trim().length < 2} onClick={() => setStep(step + 1)}>التالي</Button>
+                    : <Button variant="ghost" type="button" className="btn-bronze" onClick={doCreate}>أنشئ المجموعة</Button>}
+                </div>
               </section>
             )}
 
