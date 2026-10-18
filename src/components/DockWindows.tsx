@@ -14,10 +14,10 @@ import { GameSprite } from "@/components/GameSprite";
 
 type Ranking = "events" | "damage" | "fish" | "tribes";
 const boards = [
-  { id: "events" as const, label: "الأعلى نقاطاً", icon: Trophy },
+  { id: "events" as const, label: "الأكثر نقاطاً", icon: Trophy },
   { id: "damage" as const, label: "أقوى هجوم", icon: Swords },
   { id: "fish" as const, label: "أكثر صيداً", icon: Fish },
-  { id: "tribes" as const, label: "أقوى قبيلة", icon: Crown },
+  { id: "tribes" as const, label: "أقوى مجموعة", icon: Crown },
 ];
 
 type Row = Pick<Player, "id" | "name" | "score" | "avatar_index">;
@@ -40,11 +40,11 @@ export function RankingsWindow({ me = null, onMessage }: { me?: string | null; o
   }, [query]);
   const searching = query.trim().length > 0;
   return <div className="dock-content">
-    <label className="captain-search"><Search size={16} /><input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="اكتب اسم القبطان…" dir="auto" /></label>
+    <label className="captain-search"><Search size={16} /><input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="ابحث عن لاعب بالاسم…" dir="auto" /></label>
     {!searching && <nav className="pill-tabs" aria-label="الترتيب">{boards.map(({ id, label, icon: Icon }) => <button type="button" key={id} className={board === id ? "pill-tab on" : "pill-tab"} onClick={() => setBoard(id)}><Icon size={14} />{label}</button>)}</nav>}
     {!searching && board !== "events" ? <EmptyState icon={Trophy} title="لا يوجد ترتيب بعد" detail="سيظهر هنا بعد أول معارك ورحلات صيد حقيقية." />
       : loading ? <p className="dock-loading">جاري البحث…</p>
-      : players.length ? <ol className="ranking-list">{players.map((p, i) => <li key={p.id} className={picked?.id === p.id ? "is-picked" : ""}>
+      : players.length ? <ol className="ranking-list radar-list">{players.map((p, i) => <li key={p.id} className={picked?.id === p.id ? "is-picked" : ""}>
           <button type="button" className="ranking-row" onClick={() => setPicked(picked?.id === p.id ? null : p)}>
             <b className="ranking-position">{searching ? "•" : i + 1}</b><CaptainAvatar seed={p.avatar_index ?? 0} className="ranking-avatar" /><strong>{p.name}{p.id === me && " (أنت)"}</strong><span>{(p.score ?? 0).toLocaleString("ar")} نقطة</span>
           </button>
@@ -82,16 +82,16 @@ function AttackScene({ target, onDone }: { target: Row; onDone: () => void }) {
 
 export function InventoryWindow({ player }: { player: Player | null }) {
   const theme = getTheme(player?.theme_id ?? "");
-  const [category, setCategory] = useState("المدفعية");
-  const categories = ["المدفعية", "الملّاحون", "التحصين", "المرافئ"];
+  const [category, setCategory] = useState("الأسلحة");
+  const categories = ["الأسلحة", "الطاقم", "الدروع", "المرفأ"];
   const [gear, setGear] = useState<Record<string, number>>({});
   const art = useArtworkMap();
   useEffect(() => { const s = () => setGear(ownedGear()); s(); window.addEventListener(HARBOR_UPDATED, s); return () => window.removeEventListener(HARBOR_UPDATED, s); }, []);
-  const pool = category === "المدفعية" ? WEAPONS.map((w, i) => ({ id: w.id, name: w.name, atlas: "weapon" as const, i })) : category === "الملّاحون" ? CREWS.map((w, i) => ({ id: w.id, name: w.name, atlas: "crew" as const, i })) : ARMORS.map((w, i) => ({ id: w.id, name: w.name, atlas: "armor" as const, i }));
+  const pool = category === "الأسلحة" ? WEAPONS.map((w, i) => ({ id: w.id, name: w.name, atlas: "weapon" as const, i })) : category === "الطاقم" ? CREWS.map((w, i) => ({ id: w.id, name: w.name, atlas: "crew" as const, i })) : ARMORS.map((w, i) => ({ id: w.id, name: w.name, atlas: "armor" as const, i }));
   const mine = pool.filter((g) => (gear[g.id] ?? 0) > 0);
   return <div className="dock-content">
     <nav className="dock-tabs" aria-label="أقسام العنبر">{categories.map((item) => <Button key={item} variant="ghost" className={category === item ? "dock-tab active" : "dock-tab"} onClick={() => setCategory(item)}>{item}</Button>)}</nav>
-    {category === "المرافئ" && player ? <div className="inventory-world"><img src={theme.day.poster} alt="" /><div><strong>{theme.name}</strong><span>المرفأ الراسي فيه أسطولك</span></div></div> : category !== "المرافئ" && mine.length ? <ul className="gear-grid">{mine.map((g) => <li key={g.id} className="gear-card"><span className="gear-art">{art[`${g.id}:idle`] ? <img src={art[`${g.id}:idle`]} alt="" /> : <GameSprite atlas={g.atlas} index={g.i} />}</span><strong>{g.name}</strong><b>x{gear[g.id]}</b></li>)}</ul> : <EmptyState icon={Shield} title={`عنبر ${category} خالٍ`} detail="ما تقتنيه من الترسانة الملكية يُرصّ في هذا العنبر لحظة شرائه." />}
+    {category === "المرفأ" && player ? <div className="inventory-world"><img src={theme.day.poster} alt="" /><div><strong>{theme.name}</strong><span>مكان رسوّ سفنك الآن</span></div></div> : category !== "المرفأ" && mine.length ? <ul className="gear-grid">{mine.map((g) => <li key={g.id} className="gear-card"><span className="gear-art">{art[`${g.id}:idle`] ? <img src={art[`${g.id}:idle`]} alt="" /> : <GameSprite atlas={g.atlas} index={g.i} />}</span><strong>{g.name}</strong><b>x{gear[g.id]}</b></li>)}</ul> : <EmptyState icon={Shield} title={`لا تملك شيئاً في ${category}`} detail="اشترِ من المتجر وستجده هنا مباشرة." />}
   </div>;
 }
 
@@ -100,9 +100,9 @@ function EmptyState({ icon: Icon, title, detail }: { icon: typeof Bell; title: s
 }
 
 export function AlertsWindow() {
-  return <div className="dock-content"><div className="dock-section-heading"><Bell size={20} /><strong>مرصاد الخليج</strong></div><EmptyState icon={Bell} title="الأفق هادئ" detail="لم تلمح أبراج المراقبة شراعاً معادياً يقترب من شباكك." /></div>;
+  return <div className="dock-content"><div className="dock-section-heading"><Bell size={20} /><strong>التنبيهات</strong></div><EmptyState icon={Bell} title="لا توجد تنبيهات" detail="سنخبرك هنا إذا هاجمك أحد أو انتهت رحلة صيد." /></div>;
 }
 
 export function EnemiesWindow() {
-  return <div className="dock-content"><div className="dock-section-heading"><Skull size={20} /><strong>لوح المطلوبين</strong></div><EmptyState icon={Users} title="لا رايات سوداء معلّقة" detail="كل قرصان يجرؤ على نهب صيدك تُعلَّق رايته هنا للثأر." /></div>;
+  return <div className="dock-content"><div className="dock-section-heading"><Skull size={20} /><strong>الأعداء</strong></div><EmptyState icon={Users} title="لا يوجد أعداء" detail="من يهاجمك يظهر هنا لتردّ عليه." /></div>;
 }
