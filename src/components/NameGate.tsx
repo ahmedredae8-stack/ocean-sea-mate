@@ -38,8 +38,8 @@ export function NameGate({ onReady }: { onReady: (p: Player) => void }) {
         <img src="https://project--356242e8-144f-42b3-8292-474399c324ac.lovable.app/__l5e/assets-v1/b44ac0a6-9b58-447c-a5ae-2fc774a4f53c/logo.png" alt="" draggable={false} />
       </div>
 
-      <h1 className="auth-title">{mode === "login" ? "ختم العبور إلى المرفأ" : "توقيع ميثاق الربّان"}</h1>
-      <p className="auth-sub">لقبك البحري وكلمة سرّك — لا يحمل اللقب ربّانان</p>
+      <h1 className="auth-title">{mode === "login" ? "أهلاً بعودتك يا قبطان" : "حساب قبطان جديد"}</h1>
+      <p className="auth-sub">ادخل باسمك وكلمة المرور للبدء</p>
 
       <div className="auth-tabs">
         {(["login", "signup"] as Mode[]).map((m) => (
@@ -53,14 +53,14 @@ export function NameGate({ onReady }: { onReady: (p: Player) => void }) {
               playSfx("hover", 0.3);
             }}
           >
-            {m === "login" ? "العبور" : "ميثاق جديد"}
+            {m === "login" ? "دخول" : "حساب جديد"}
           </button>
         ))}
       </div>
 
       {mode === "signup" && (
         <div className="auth-avatars">
-          <span className="auth-avatars-label">اختر وجه ربّانك</span>
+          <span className="auth-avatars-label">اختر صورتك</span>
           <div className="auth-avatars-row">
             {[0, 1, 2, 3, 4, 5].map((i) => (
               <button
@@ -89,7 +89,7 @@ export function NameGate({ onReady }: { onReady: (p: Player) => void }) {
             maxLength={mode === "login" ? 255 : 16}
             autoComplete="username"
             dir="auto"
-            placeholder={mode === "login" ? "اللقب البحري أو البريد" : "اللقب البحري"}
+            placeholder={mode === "login" ? "اسمك في اللعبة" : "اختر اسماً (حتى 16 حرفاً)"}
           />
         </label>
         <label className="auth-field">
@@ -100,7 +100,7 @@ export function NameGate({ onReady }: { onReady: (p: Player) => void }) {
             type="password"
             maxLength={72}
             autoComplete={mode === "login" ? "current-password" : "new-password"}
-            placeholder="كلمة السرّ"
+            placeholder="كلمة المرور"
           />
         </label>
 
@@ -108,13 +108,13 @@ export function NameGate({ onReady }: { onReady: (p: Player) => void }) {
 
         <button type="submit" disabled={busy} className="auth-submit" onPointerEnter={() => playSfx("hover", 0.3)}>
           {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Anchor className="h-4 w-4" />}
-          {mode === "login" ? "اختم وارفع المرساة" : "وقّع الميثاق"}
+          {mode === "login" ? "ادخل اللعبة" : "أنشئ حسابي"}
         </button>
       </form>
 
       <p className="auth-note">
         <ShieldCheck className="h-3.5 w-3.5" />
-        لا يمكن لأحد الدخول باسمك — الاسم مرتبط بكلمة مرورك ولا يُسترجع.
+        اسمك محمي بكلمة المرور، احفظها جيداً.
       </p>
     </div>
   );

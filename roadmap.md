@@ -24,5 +24,5 @@
 - [ ] Replace legacy ship artwork across the island ship market and store with the unified catalog.
 - [ ] Redesign the island fish-market entry and remove its chart, selling flow, and quest list.
 - [x] Finish the tribe, messages, and settings window presentation; authenticated messaging requires the user's existing sign-in.
-- [ ] Finish the sign-in screen with reliable default portraits and optional profile artwork.
+- [x] Simplify sign-in, groups (3-step creation), radar, alerts and storage wording.
 - [ ] Complete actual purchases, inventory persistence, battle events, and damage/catch rankings when their gameplay and records are available.

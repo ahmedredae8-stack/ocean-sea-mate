@@ -28,7 +28,7 @@ export const Route = createFileRoute("/tribes")({
   head: () => ({
     meta: [
       { title: "مجلس الأساطيل — خليج القراصنة" },
-      { name: "description", content: "انضم إلى قبيلة، ارتقِ في الرتب، أنجز مهام القبيلة وتصدّر قائمة القادة في خليج القراصنة." },
+      { name: "description", content: "انضم إلى قبيلة، ارتقِ في الرتب، أنجز مهام القبيلة وتصدّر أقوى المجموعات في خليج القراصنة." },
       { property: "og:title", content: "مجلس الأساطيل — خليج القراصنة" },
       { property: "og:description", content: "قبائل القراصنة: انضمام، ترقيات، مهام يومية وقائمة متصدرين." },
       { property: "og:type", content: "website" },
@@ -45,6 +45,7 @@ export function TribesPage() {
   const [members, setMembers] = useState<MemberRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
+  const [step, setStep] = useState(0);
   const [name, setName] = useState("");
   const [motto, setMotto] = useState("");
   const [emblem, setEmblem] = useState(EMBLEMS[0]?.id ?? "skull");
@@ -61,7 +62,7 @@ export function TribesPage() {
         setMine(m);
         setMembers(m ? await listMembers(m.tribe_id) : []);
       } else { setMine(null); setMembers([]); }
-    } catch { setError("تعذّر فتح سجل الأساطيل."); }
+    } catch { setError("ما قدرنا نفتح المجموعات، حاول مرة ثانية."); }
     finally { setLoading(false); }
   }, [player]);
 
@@ -92,8 +93,8 @@ export function TribesPage() {
             <ArrowRight />
           </Link>
           <div>
-            <span>رايات الخليج</span>
-            <h1>مجلس الأساطيل</h1>
+            <span>العب مع أصحابك</span>
+            <h1>المجموعات</h1>
           </div>
           <Swords />
         </header>
@@ -110,9 +111,9 @@ export function TribesPage() {
                 <img src={emblemSrc(myTribe.emblem)} alt="" className="tribe-hero-emblem" />
                 <div className="tribe-hero-text">
                   <h2>{myTribe.name}</h2>
-                  <p>{myTribe.motto || "أسطول ينتظر نقش رايته"}</p>
+                  <p>{myTribe.motto || "لم يُكتب شعار بعد"}</p>
                   <span className="tribe-rank">
-                    <Shield className="h-3.5 w-3.5" /> منزلتك: {rankLabel[(mine?.rank ?? "member")] ?? (mine?.rank ?? "member")} · غنيمتك للخزينة{" "}
+                    <Shield className="h-3.5 w-3.5" /> منزلتك: {rankLabel[(mine?.rank ?? "member")] ?? (mine?.rank ?? "member")} · نقاطك{" "}
                     {mine?.contribution ?? 0}
                   </span>
                 </div>
@@ -132,36 +133,36 @@ export function TribesPage() {
               <section className="tribe-hero tribe-hero-empty">
                 <Flag className="h-8 w-8 text-game-gold" />
                 <div className="tribe-hero-text">
-                  <h2>لا راية فوق صاريك</h2>
-                  <p>ارفع راية أسطول قائم أو انقش رايتك وجمّع ربابنتك.</p>
+                  <h2>أنت بدون مجموعة</h2>
+                  <p>انضم لمجموعة من القائمة بالأسفل، أو أنشئ مجموعتك في 3 خطوات.</p>
                 </div>
-                <Button variant="ghost" type="button" className="tribe-create" onClick={() => setCreating((v) => !v)} disabled={!player}>
-                  <Plus className="h-4 w-4" /> تأسيس قبيلة
+                <Button variant="ghost" type="button" className="tribe-create" onClick={() => { setCreating((v) => !v); setStep(0); }} disabled={!player}>
+                  <Plus className="h-4 w-4" /> مجموعة جديدة
                 </Button>
               </section>
             )}
 
             {creating && !myTribe && (
-              <section className="tribe-form">
-                <input value={name} onChange={(e) => setName(e.target.value)} maxLength={20} aria-label="اسم الأسطول" placeholder="اسم الأسطول" />
-                <input value={motto} onChange={(e) => setMotto(e.target.value)} maxLength={80} aria-label="نقش الراية" placeholder="نقش الراية" />
-                <div className="tribe-emblems">
+              <section className="tribe-form tribe-wizard">
+                <ol className="wizard-steps" aria-label="خطوات الإنشاء">
+                  {["الاسم", "العلم", "الشعار"].map((s, i) => <li key={s} className={i === step ? "on" : i < step ? "done" : ""}><b>{i + 1}</b>{s}</li>)}
+                </ol>
+                {step === 0 && <label className="wizard-field"><span>اختر اسماً لمجموعتك</span><input value={name} onChange={(e) => setName(e.target.value)} maxLength={20} placeholder="مثال: صقور الخليج" /></label>}
+                {step === 1 && <div className="tribe-emblems">
                   {EMBLEMS.map((e) => (
-                    <Button variant="ghost"
-                      key={e.id}
-                      type="button"
-                      aria-label={e.id}
-                      className={e.id === emblem ? "tribe-emblem tribe-emblem-on" : "tribe-emblem"}
-                      onClick={() => setEmblem(e.id)}
-                    >
+                    <Button variant="ghost" key={e.id} type="button" aria-label={e.id} className={e.id === emblem ? "tribe-emblem tribe-emblem-on" : "tribe-emblem"} onClick={() => setEmblem(e.id)}>
                       <img src={e.src} alt="" />
                     </Button>
                   ))}
-                </div>
+                </div>}
+                {step === 2 && <label className="wizard-field"><span>جملة قصيرة تعرّف مجموعتك (اختياري)</span><input value={motto} onChange={(e) => setMotto(e.target.value)} maxLength={80} placeholder="مثال: نصطاد معاً ونربح معاً" /></label>}
                 {error && <p className="auth-error">{error}</p>}
-                <Button variant="ghost" type="button" className="auth-submit" onClick={doCreate}>
-                  إنشاء القبيلة
-                </Button>
+                <div className="wizard-nav">
+                  {step > 0 && <Button variant="ghost" type="button" className="btn-plain" onClick={() => setStep(step - 1)}>السابق</Button>}
+                  {step < 2
+                    ? <Button variant="ghost" type="button" className="btn-bronze" disabled={step === 0 && name.trim().length < 2} onClick={() => setStep(step + 1)}>التالي</Button>
+                    : <Button variant="ghost" type="button" className="btn-bronze" onClick={doCreate}>أنشئ المجموعة</Button>}
+                </div>
               </section>
             )}
 
@@ -169,7 +170,7 @@ export function TribesPage() {
               <>
                 <section className="tribe-block">
                   <h3>
-                    <Trophy className="h-4 w-4" /> مهام القبيلة اليومية
+                    <Trophy className="h-4 w-4" /> مهام اليوم للمجموعة
                   </h3>
                   <ul className="tribe-quests">
                     {TRIBE_QUESTS.map((q) => (
@@ -214,7 +215,7 @@ export function TribesPage() {
                             }}
                           >
                             <Crown className="h-3.5 w-3.5" />
-                            {m.rank === "member" ? "رفع المنزلة" : "خفض المنزلة"}
+                            {m.rank === "member" ? "ترقية" : "تنزيل"}
                           </Button>
                         )}
                       </li>
@@ -226,7 +227,7 @@ export function TribesPage() {
 
             <section className="tribe-block">
               <h3>
-                <Trophy className="h-4 w-4" /> قائمة القادة
+                <Trophy className="h-4 w-4" /> أقوى المجموعات
               </h3>
               <ul className="tribe-board">
                 {tribes.map((t, i) => (
@@ -252,7 +253,7 @@ export function TribesPage() {
                     )}
                   </li>
                 ))}
-                {tribes.length === 0 && <p className="tribe-empty">البحر خالٍ من الرايات — انقش أولها.</p>}
+                {tribes.length === 0 && <p className="tribe-empty">لا توجد مجموعات بعد — كن أول من ينشئ واحدة.</p>}
               </ul>
             </section>
           </>
