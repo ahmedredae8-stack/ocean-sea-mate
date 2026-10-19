@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { Bell, Crown, Fish, MessageCircle, Rocket, Search, Shield, Skull, Swords, Trophy, Users } from "lucide-react";
 import { playSfx } from "@/lib/sound";
 import { hulls } from "@/lib/fleetCatalog";
-import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { CaptainAvatar } from "@/components/GameSprite";
 import type { Player } from "@/lib/player";
@@ -39,21 +38,34 @@ export function RankingsWindow({ me = null, onMessage }: { me?: string | null; o
     return () => { active = false; window.clearTimeout(t); };
   }, [query]);
   const searching = query.trim().length > 0;
-  return <div className="dock-content">
-    <label className="captain-search"><Search size={16} /><input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="ابحث عن لاعب بالاسم…" dir="auto" /></label>
-    {!searching && <nav className="pill-tabs" aria-label="الترتيب">{boards.map(({ id, label, icon: Icon }) => <button type="button" key={id} className={board === id ? "pill-tab on" : "pill-tab"} onClick={() => setBoard(id)}><Icon size={14} />{label}</button>)}</nav>}
-    {!searching && board !== "events" ? <EmptyState icon={Trophy} title="لا يوجد ترتيب بعد" detail="سيظهر هنا بعد أول معارك ورحلات صيد حقيقية." />
+  return <div className="registry">
+    <div className="registry-top">
+      <label className="registry-search"><Search size={16} /><input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="اكتب اسم قبطان…" dir="auto" /></label>
+      {!searching && <div className="registry-boards" role="tablist">{boards.map(({ id, label, icon: Icon }) => <button type="button" role="tab" aria-selected={board === id} key={id} onClick={() => setBoard(id)} title={label}><Icon size={15} /><span>{label}</span></button>)}</div>}
+    </div>
+    {!searching && board !== "events" ? <EmptyState icon={Trophy} title="لا يوجد ترتيب بعد" detail="يظهر بعد أول معارك ورحلات حقيقية." />
       : loading ? <p className="dock-loading">جاري البحث…</p>
-      : players.length ? <ol className="ranking-list radar-list">{players.map((p, i) => <li key={p.id} className={picked?.id === p.id ? "is-picked" : ""}>
-          <button type="button" className="ranking-row" onClick={() => setPicked(picked?.id === p.id ? null : p)}>
-            <b className="ranking-position">{searching ? "•" : i + 1}</b><CaptainAvatar seed={p.avatar_index ?? 0} className="ranking-avatar" /><strong>{p.name}{p.id === me && " (أنت)"}</strong><span>{(p.score ?? 0).toLocaleString("ar")} نقطة</span>
+      : players.length ? <>
+        {!searching && players.length >= 3 && <div className="registry-podium">{[1, 0, 2].map((idx) => { const p = players[idx]; return p ? <button type="button" key={p.id} className={`podium-step place-${idx + 1}`} onClick={() => setPicked(p)}><CaptainAvatar seed={p.avatar_index ?? 0} className="podium-face" /><strong>{p.name}</strong><span>{(p.score ?? 0).toLocaleString("ar")}</span><b>{idx + 1}</b></button> : null; })}</div>}
+        <ul className="registry-cards">{players.slice(!searching && players.length >= 3 ? 3 : 0).map((p, i) => <li key={p.id}>
+          <button type="button" className={`captain-card ${p.id === me ? "is-me" : ""}`} onClick={() => setPicked(p)}>
+            <span className="captain-card-no">{searching ? "" : i + 4}</span><CaptainAvatar seed={p.avatar_index ?? 0} className="captain-card-face" /><strong>{p.name}{p.id === me && " (أنت)"}</strong><span>{(p.score ?? 0).toLocaleString("ar")} نقطة</span>
           </button>
-          {picked?.id === p.id && p.id !== me && <div className="captain-actions">
-            <button type="button" className="act-btn act-talk" onClick={() => onMessage?.(p.id)}><MessageCircle size={16} />راسله</button>
-            <button type="button" className="act-btn act-hit" onClick={() => setAttack(p)}><Rocket size={16} />هاجم سفينته</button>
-          </div>}
-        </li>)}</ol>
+        </li>)}</ul>
+      </>
       : <EmptyState icon={Users} title={searching ? "ما لقينا أحد بهذا الاسم" : "لا يوجد قباطنة بعد"} detail={searching ? "جرّب اسماً آخر." : "كن أول من يبحر."} />}
+    {picked && <div className="captain-sheet" role="dialog" aria-label={picked.name} onClick={() => setPicked(null)}>
+      <section onClick={(e) => e.stopPropagation()}>
+        <CaptainAvatar seed={picked.avatar_index ?? 0} className="captain-sheet-face" />
+        <h3>{picked.name}</h3>
+        <p>{(picked.score ?? 0).toLocaleString("ar")} نقطة</p>
+        {picked.id === me ? <p className="captain-sheet-note">هذا حسابك</p> : <div className="captain-sheet-acts">
+          <button type="button" className="sheet-btn talk" onClick={() => { setPicked(null); onMessage?.(picked.id); }}><MessageCircle size={18} />راسله</button>
+          <button type="button" className="sheet-btn hit" onClick={() => { setAttack(picked); setPicked(null); }}><Rocket size={18} />هاجم سفينته</button>
+        </div>}
+        <button type="button" className="captain-sheet-close" onClick={() => setPicked(null)}>إغلاق</button>
+      </section>
+    </div>}
     {attack && <AttackScene target={attack} onDone={() => setAttack(null)} />}
   </div>;
 }
@@ -89,9 +101,19 @@ export function InventoryWindow({ player }: { player: Player | null }) {
   useEffect(() => { const s = () => setGear(ownedGear()); s(); window.addEventListener(HARBOR_UPDATED, s); return () => window.removeEventListener(HARBOR_UPDATED, s); }, []);
   const pool = category === "الأسلحة" ? WEAPONS.map((w, i) => ({ id: w.id, name: w.name, atlas: "weapon" as const, i })) : category === "الطاقم" ? CREWS.map((w, i) => ({ id: w.id, name: w.name, atlas: "crew" as const, i })) : ARMORS.map((w, i) => ({ id: w.id, name: w.name, atlas: "armor" as const, i }));
   const mine = pool.filter((g) => (gear[g.id] ?? 0) > 0);
-  return <div className="dock-content">
-    <nav className="dock-tabs" aria-label="أقسام العنبر">{categories.map((item) => <Button key={item} variant="ghost" className={category === item ? "dock-tab active" : "dock-tab"} onClick={() => setCategory(item)}>{item}</Button>)}</nav>
-    {category === "المرفأ" && player ? <div className="inventory-world"><img src={theme.day.poster} alt="" /><div><strong>{theme.name}</strong><span>مكان رسوّ سفنك الآن</span></div></div> : category !== "المرفأ" && mine.length ? <ul className="gear-grid">{mine.map((g) => <li key={g.id} className="gear-card"><span className="gear-art">{art[`${g.id}:idle`] ? <img src={art[`${g.id}:idle`]} alt="" /> : <GameSprite atlas={g.atlas} index={g.i} />}</span><strong>{g.name}</strong><b>x{gear[g.id]}</b></li>)}</ul> : <EmptyState icon={Shield} title={`لا تملك شيئاً في ${category}`} detail="اشترِ من المتجر وستجده هنا مباشرة." />}
+  const [focus, setFocus] = useState<string | null>(null);
+  const picked = mine.find((g) => g.id === focus) ?? null;
+  const total = Object.values(gear).reduce((s, n) => s + n, 0);
+  return <div className="vault">
+    <aside className="vault-rail" role="tablist">{categories.map((item) => <button type="button" role="tab" key={item} aria-selected={category === item} onClick={() => { setCategory(item); setFocus(null); }}>{item}</button>)}<small>{total} قطعة</small></aside>
+    <div className="vault-main">
+      {category === "المرفأ" && player ? <div className="vault-harbor"><img src={theme.day.poster} alt="" /><div><strong>{theme.name}</strong><span>هنا ترسو سفنك الآن</span></div></div>
+        : mine.length ? <>
+          <ul className="vault-grid">{mine.map((g) => <li key={g.id}><button type="button" className={`vault-slot ${focus === g.id ? "is-on" : ""}`} onClick={() => setFocus(focus === g.id ? null : g.id)}>{art[`${g.id}:idle`] ? <img src={art[`${g.id}:idle`]} alt="" /> : <GameSprite atlas={g.atlas} index={g.i} />}<b>{gear[g.id]}</b></button></li>)}
+            {Array.from({ length: Math.max(0, 12 - mine.length) }).map((_, i) => <li key={`e${i}`}><span className="vault-slot is-empty" /></li>)}</ul>
+          <div className="vault-detail">{picked ? <><strong>{picked.name}</strong><span>عندك {gear[picked.id]}</span></> : <span>اضغط على قطعة لترى تفاصيلها</span>}</div>
+        </> : <EmptyState icon={Shield} title={`لا تملك شيئاً في ${category}`} detail="اشترِ من المتجر وستجده هنا مباشرة." />}
+    </div>
   </div>;
 }
 
@@ -100,9 +122,23 @@ function EmptyState({ icon: Icon, title, detail }: { icon: typeof Bell; title: s
 }
 
 export function AlertsWindow() {
-  return <div className="dock-content"><div className="dock-section-heading"><Bell size={20} /><strong>التنبيهات</strong></div><EmptyState icon={Bell} title="لا توجد تنبيهات" detail="سنخبرك هنا إذا هاجمك أحد أو انتهت رحلة صيد." /></div>;
+  return <Chronicle mode="alerts" />;
 }
 
 export function EnemiesWindow() {
-  return <div className="dock-content"><div className="dock-section-heading"><Skull size={20} /><strong>الأعداء</strong></div><EmptyState icon={Users} title="لا يوجد أعداء" detail="من يهاجمك يظهر هنا لتردّ عليه." /></div>;
+  return <Chronicle mode="enemies" />;
+}
+
+/** Bay chronicle: one timeline for news and rivals; stays empty until real records exist. */
+function Chronicle({ mode }: { mode: "alerts" | "enemies" }) {
+  const [tab, setTab] = useState(mode);
+  return <div className="chronicle">
+    <div className="chronicle-tabs" role="tablist">
+      <button type="button" role="tab" aria-selected={tab === "alerts"} onClick={() => setTab("alerts")}><Bell size={15} />أخبار الخليج</button>
+      <button type="button" role="tab" aria-selected={tab === "enemies"} onClick={() => setTab("enemies")}><Skull size={15} />خصومي</button>
+    </div>
+    <div className="chronicle-line">
+      {tab === "alerts" ? <EmptyState icon={Bell} title="لا أخبار جديدة" detail="نخبرك هنا إذا هاجمك أحد أو رجع قاربك." /> : <EmptyState icon={Skull} title="ما عندك خصوم" detail="من يهاجمك يظهر هنا وتقدر ترد عليه." />}
+    </div>
+  </div>;
 }

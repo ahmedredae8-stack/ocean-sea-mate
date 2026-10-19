@@ -172,11 +172,13 @@ export function FishingFleet({ themeId, themeName }: { themeId: string; themeNam
         ].filter(Boolean).join(" ");
         return (
           <div key={ship.id} className={laneClasses} style={style}>
-            <div className={`ship-gauge ${ship.state === "full" ? "is-full" : ""}`} aria-label={`السفينة ${ship.id}: ${trip ? `الشبكة ${Math.round(progress * 100)}٪` : "في الميناء"}`}>
-              <span className="ship-gauge-name">قارب {ship.id}<b>مستوى {Math.max(1, fleetCatalog.findIndex((s) => s.id === catalogId) + 1)}</b></span>
-              <span className="ship-gauge-track"><i style={{ width: `${trip ? Math.round(progress * 100) : 0}%` }} /></span>
-              <span className="ship-gauge-text">{!trip ? "جاهز للصيد" : ship.state === "full" ? "الشبكة ممتلئة — ارجع" : busy ? "في طريق العودة" : `يصطاد ${Math.round(progress * 100)}٪`}</span>
-            </div>
+            {trip && (ship.state === "casting" || ship.state === "fishing" || ship.state === "full") && (
+              <div className={`net-thread ${ship.state === "full" ? "is-full" : ""}`} role="progressbar" aria-valuenow={Math.round(progress * 100)} aria-valuemin={0} aria-valuemax={100} aria-label={`شبكة القارب ${ship.id}`}>
+                <b>Lv{Math.max(1, fleetCatalog.findIndex((s) => s.id === catalogId) + 1)}</b>
+                <span><i style={{ width: `${Math.round(progress * 100)}%` }} /></span>
+                <em>{ship.state === "full" ? "امتلأت" : `${Math.round(progress * 100)}٪`}</em>
+              </div>
+            )}
             {selected === ship.id && !busy && (
               <div className="ship-actions" role="menu" aria-label={`أوامر السفينة ${ship.id}`}>
                 <Button variant="ghost" role="menuitem" className="ship-action" onClick={() => sail(ship)} title={ship.state === "docked" ? "الذهاب للصيد" : "العودة للميناء"}>
@@ -241,18 +243,16 @@ export function FishingFleet({ themeId, themeName }: { themeId: string; themeNam
         const value = haulResult.reduce((s, l) => s + l.qty * l.fish.base, 0);
         return (
           <div className="fleet-modal" role="dialog" aria-modal="true" aria-label="نتيجة الصيد" onClick={() => setHaulResult(null)}>
-            <section className="catch-report" dir="rtl" onClick={(event) => event.stopPropagation()}>
-              <span className="catch-report-seal" aria-hidden="true">⚓</span>
-              <h2>رجع القارب!</h2>
-              <p className="catch-report-sub">هذا ما اصطدته في هذه الرحلة</p>
-              <div className="catch-report-grid">
-                {haulResult.length === 0 && <p className="mk-empty">رجعت مبكراً، الشبكة فاضية</p>}
-                {haulResult.map((line) => (
-                  <div key={line.fish.id} className="catch-report-item"><img src={line.fish.img} alt="" /><span>{line.fish.name}</span><b>×{line.qty.toLocaleString("ar")}</b></div>
+            <section className="haul-ticket" dir="rtl" onClick={(event) => event.stopPropagation()}>
+              <div className="haul-ribbon">حصيلة الرحلة</div>
+              <div className="haul-fish">
+                {haulResult.length === 0 && <p className="haul-none">رجعت مبكراً، الشبكة فاضية</p>}
+                {haulResult.map((line, i) => (
+                  <div key={line.fish.id} className="haul-fish-item" style={{ animationDelay: `${i * 90}ms` }}><img src={line.fish.img} alt="" /><b>×{line.qty.toLocaleString("ar")}</b><span>{line.fish.name}</span></div>
                 ))}
               </div>
-              <div className="catch-report-sum"><span>كل السمك<b>{total.toLocaleString("ar")}</b></span><span>قيمته تقريباً<b>{value.toLocaleString("ar")} ذهب</b></span></div>
-              <Button className="catch-report-ok" onClick={() => setHaulResult(null)}>تمام، خزّنه</Button>
+              <div className="haul-total"><span>{total.toLocaleString("ar")} سمكة</span><strong>≈ {value.toLocaleString("ar")} ذهب</strong></div>
+              <Button className="haul-ok" onClick={() => setHaulResult(null)}>خزّن الحصيلة</Button>
             </section>
           </div>
         );

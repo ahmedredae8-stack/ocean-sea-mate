@@ -2,7 +2,6 @@ import { useCallback, useEffect, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, Crown, Flag, Loader2, LogOut, Plus, Shield, Swords, Trophy } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
 import { CaptainAvatar } from "@/components/GameSprite";
 import { usePlayer } from "@/hooks/usePlayer";
 import { playSfx } from "@/lib/sound";
@@ -45,7 +44,6 @@ export function TribesPage() {
   const [members, setMembers] = useState<MemberRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
-  const [step, setStep] = useState(0);
   const [name, setName] = useState("");
   const [motto, setMotto] = useState("");
   const [emblem, setEmblem] = useState(EMBLEMS[0]?.id ?? "skull");
@@ -85,180 +83,112 @@ export function TribesPage() {
     void refresh();
   };
 
+  const [tab, setTab] = useState<"fleets" | "mine">("fleets");
+  const view = myTribe && tab === "mine" ? "mine" : "fleets";
+
   return (
-    <main className="social-page" dir="rtl">
-      <div className="social-wrap">
-        <header className="social-titlebar">
-          <Link to="/" className="icon-control" aria-label="رجوع">
-            <ArrowRight />
-          </Link>
-          <div>
-            <span>العب مع أصحابك</span>
-            <h1>المجموعات</h1>
-          </div>
-          <Swords />
-        </header>
+    <main className="council" dir="rtl">
+      <header className="council-top">
+        <Link to="/" className="council-back" aria-label="رجوع"><ArrowRight size={18} /></Link>
+        <div className="council-switch" role="tablist">
+          <button type="button" role="tab" aria-selected={view === "fleets"} onClick={() => setTab("fleets")}><Flag size={15} />الأساطيل</button>
+          <button type="button" role="tab" aria-selected={view === "mine"} disabled={!myTribe} onClick={() => setTab("mine")}><Shield size={15} />أسطولي</button>
+        </div>
+        {!myTribe && <button type="button" className="council-charter-btn" disabled={!player} onClick={() => setCreating(true)}><Plus size={16} />ارفع رايتك</button>}
+      </header>
 
-        {error && <div className="social-error" role="alert">{error}<Button variant="ghost" onClick={() => void refresh()}>إعادة المحاولة</Button></div>}
-        {loading ? (
-          <div className="grid place-items-center py-16">
-            <Loader2 className="h-7 w-7 animate-spin text-game-gold" />
-          </div>
-        ) : (
-          <>
-            {myTribe ? (
-              <section className="tribe-hero">
-                <img src={emblemSrc(myTribe.emblem)} alt="" className="tribe-hero-emblem" />
-                <div className="tribe-hero-text">
-                  <h2>{myTribe.name}</h2>
-                  <p>{myTribe.motto || "لم يُكتب شعار بعد"}</p>
-                  <span className="tribe-rank">
-                    <Shield className="h-3.5 w-3.5" /> منزلتك: {rankLabel[(mine?.rank ?? "member")] ?? (mine?.rank ?? "member")} · نقاطك{" "}
-                    {mine?.contribution ?? 0}
-                  </span>
-                </div>
-                <Button variant="ghost"
-                  type="button"
-                  className="tribe-leave"
-                  onClick={async () => {
-                    playSfx("click", 0.6);
-                    if (player) await leaveTribe(player.id);
-                    void refresh();
-                  }}
-                >
-                  <LogOut className="h-4 w-4" /> مغادرة
-                </Button>
-              </section>
-            ) : (
-              <section className="tribe-hero tribe-hero-empty">
-                <Flag className="h-8 w-8 text-game-gold" />
-                <div className="tribe-hero-text">
-                  <h2>أنت بدون مجموعة</h2>
-                  <p>انضم لمجموعة من القائمة بالأسفل، أو أنشئ مجموعتك في 3 خطوات.</p>
-                </div>
-                <Button variant="ghost" type="button" className="tribe-create" onClick={() => { setCreating((v) => !v); setStep(0); }} disabled={!player}>
-                  <Plus className="h-4 w-4" /> مجموعة جديدة
-                </Button>
-              </section>
-            )}
+      {error && <div className="council-error" role="alert">{error}<button type="button" onClick={() => void refresh()}>حاول مرة ثانية</button></div>}
 
-            {creating && !myTribe && (
-              <section className="tribe-form tribe-wizard">
-                <ol className="wizard-steps" aria-label="خطوات الإنشاء">
-                  {["الاسم", "العلم", "الشعار"].map((s, i) => <li key={s} className={i === step ? "on" : i < step ? "done" : ""}><b>{i + 1}</b>{s}</li>)}
-                </ol>
-                {step === 0 && <label className="wizard-field"><span>اختر اسماً لمجموعتك</span><input value={name} onChange={(e) => setName(e.target.value)} maxLength={20} placeholder="مثال: صقور الخليج" /></label>}
-                {step === 1 && <div className="tribe-emblems">
-                  {EMBLEMS.map((e) => (
-                    <Button variant="ghost" key={e.id} type="button" aria-label={e.id} className={e.id === emblem ? "tribe-emblem tribe-emblem-on" : "tribe-emblem"} onClick={() => setEmblem(e.id)}>
-                      <img src={e.src} alt="" />
-                    </Button>
-                  ))}
-                </div>}
-                {step === 2 && <label className="wizard-field"><span>جملة قصيرة تعرّف مجموعتك (اختياري)</span><input value={motto} onChange={(e) => setMotto(e.target.value)} maxLength={80} placeholder="مثال: نصطاد معاً ونربح معاً" /></label>}
-                {error && <p className="auth-error">{error}</p>}
-                <div className="wizard-nav">
-                  {step > 0 && <Button variant="ghost" type="button" className="btn-plain" onClick={() => setStep(step - 1)}>السابق</Button>}
-                  {step < 2
-                    ? <Button variant="ghost" type="button" className="btn-bronze" disabled={step === 0 && name.trim().length < 2} onClick={() => setStep(step + 1)}>التالي</Button>
-                    : <Button variant="ghost" type="button" className="btn-bronze" onClick={doCreate}>أنشئ المجموعة</Button>}
-                </div>
-              </section>
-            )}
-
-            {myTribe && (
-              <>
-                <section className="tribe-block">
-                  <h3>
-                    <Trophy className="h-4 w-4" /> مهام اليوم للمجموعة
-                  </h3>
-                  <ul className="tribe-quests">
-                    {TRIBE_QUESTS.map((q) => (
-                      <li key={q.id}>
-                        <span>{q.label}</span>
-                        <Button variant="ghost"
-                          type="button"
-                          onClick={async () => {
-                            playSfx("click", 0.65);
-                            if (player) await addContribution(player.id, q.reward);
-                            void refresh();
-                          }}
-                        >
-                          +{q.reward}
-                        </Button>
-                      </li>
-                    ))}
-                  </ul>
-                </section>
-
-                <section className="tribe-block">
-                  <h3>
-                    <Shield className="h-4 w-4" /> الأعضاء
-                  </h3>
-                  <ul className="tribe-members">
-                    {members.map((m) => (
-                      <li key={m.id}>
-                        <CaptainAvatar seed={m.players?.avatar_index ?? 0} className="tribe-member-face" />
-                        <div>
-                          <strong>{m.players?.name ?? "ربّان"}</strong>
-                          <small>
-                            {rankLabel[m.rank] ?? m.rank} · {m.contribution} نقطة
-                          </small>
-                        </div>
-                        {isLeader && m.rank !== "leader" && (
-                          <Button variant="ghost"
-                            type="button"
-                            onClick={async () => {
-                              playSfx("click", 0.6);
-                              await promoteMember(m.id, m.rank === "member" ? "officer" : "member");
-                              void refresh();
-                            }}
-                          >
-                            <Crown className="h-3.5 w-3.5" />
-                            {m.rank === "member" ? "ترقية" : "تنزيل"}
-                          </Button>
-                        )}
-                      </li>
-                    ))}
-                  </ul>
-                </section>
-              </>
-            )}
-
-            <section className="tribe-block">
-              <h3>
-                <Trophy className="h-4 w-4" /> أقوى المجموعات
-              </h3>
-              <ul className="tribe-board">
-                {tribes.map((t, i) => (
-                  <li key={t.id}>
-                    <span className={`tribe-place tribe-place-${Math.min(i + 1, 4)}`}>{i + 1}</span>
-                    <img src={emblemSrc(t.emblem)} alt="" />
-                    <div>
-                      <strong>{t.name}</strong>
-                      <small>{t.motto || "—"}</small>
-                    </div>
-                    <b>{t.score}</b>
-                    {player && !mine && (
-                      <Button variant="ghost"
-                        type="button"
-                        onClick={async () => {
-                          playSfx("click", 0.65);
-                          await joinTribe(player.id, t.id);
-                          void refresh();
-                        }}
-                      >
-                        انضمام
-                      </Button>
+      {loading ? (
+        <div className="council-loading"><Loader2 className="animate-spin" /></div>
+      ) : view === "mine" && myTribe ? (
+        <div className="council-mine">
+          <section className="banner-hall">
+            <img src={emblemSrc(myTribe.emblem)} alt="" />
+            <div>
+              <h2>{myTribe.name}</h2>
+              <p>{myTribe.motto || "بدون شعار"}</p>
+            </div>
+            <dl>
+              <div><dt>منزلتك</dt><dd>{rankLabel[mine?.rank ?? "member"] ?? mine?.rank}</dd></div>
+              <div><dt>نقاطك</dt><dd>{mine?.contribution ?? 0}</dd></div>
+              <div><dt>البحارة</dt><dd>{members.length}</dd></div>
+            </dl>
+          </section>
+          <div className="council-columns">
+            <section className="council-panel">
+              <h3><Trophy size={15} />ساهم اليوم</h3>
+              <div className="duty-grid">
+                {TRIBE_QUESTS.map((q) => (
+                  <button key={q.id} type="button" className="duty-tile" onClick={async () => { playSfx("click", 0.65); if (player) await addContribution(player.id, q.reward); void refresh(); }}>
+                    <span>{q.label}</span><b>+{q.reward}</b>
+                  </button>
+                ))}
+              </div>
+            </section>
+            <section className="council-panel">
+              <h3><Swords size={15} />البحارة</h3>
+              <ul className="crew-roll">
+                {members.map((m) => (
+                  <li key={m.id}>
+                    <CaptainAvatar seed={m.players?.avatar_index ?? 0} className="crew-roll-face" />
+                    <strong>{m.players?.name ?? "بحّار"}</strong>
+                    <small className={`rank-chip rank-${m.rank}`}>{rankLabel[m.rank] ?? m.rank}</small>
+                    <em>{m.contribution}</em>
+                    {isLeader && m.rank !== "leader" && (
+                      <button type="button" className="crew-roll-act" aria-label={m.rank === "member" ? "ترقية" : "تنزيل"} onClick={async () => { playSfx("click", 0.6); await promoteMember(m.id, m.rank === "member" ? "officer" : "member"); void refresh(); }}>
+                        <Crown size={13} />
+                      </button>
                     )}
                   </li>
                 ))}
-                {tribes.length === 0 && <p className="tribe-empty">لا توجد مجموعات بعد — كن أول من ينشئ واحدة.</p>}
               </ul>
             </section>
-          </>
-        )}
-      </div>
+          </div>
+          <button type="button" className="council-leave" onClick={async () => { playSfx("click", 0.6); if (player) await leaveTribe(player.id); setTab("fleets"); void refresh(); }}><LogOut size={14} />مغادرة الأسطول</button>
+        </div>
+      ) : (
+        <div className="banner-wall">
+          {tribes.map((t, i) => (
+            <article key={t.id} className={`banner-flag ${i < 3 ? `is-top top-${i + 1}` : ""} ${mine?.tribe_id === t.id ? "is-mine" : ""}`}>
+              <span className="banner-place">{i + 1}</span>
+              <img src={emblemSrc(t.emblem)} alt="" />
+              <strong>{t.name}</strong>
+              <small>{t.motto || "—"}</small>
+              <b className="banner-score"><Trophy size={12} />{t.score}</b>
+              {player && !mine && (
+                <button type="button" className="banner-join" onClick={async () => { playSfx("click", 0.65); await joinTribe(player.id, t.id); void refresh(); }}>انضم</button>
+              )}
+            </article>
+          ))}
+          {tribes.length === 0 && <p className="council-empty">لا توجد أساطيل بعد — ارفع أول راية.</p>}
+        </div>
+      )}
+
+      {creating && !myTribe && (
+        <div className="charter-overlay" onClick={() => setCreating(false)}>
+          <section className="charter" onClick={(e) => e.stopPropagation()}>
+            <h2>ميثاق أسطول جديد</h2>
+            <div className="charter-preview">
+              <img src={emblemSrc(emblem)} alt="" />
+              <strong>{name.trim() || "اسم أسطولك"}</strong>
+              <small>{motto.trim() || "شعارك يظهر هنا"}</small>
+            </div>
+            <div className="charter-emblems">
+              {EMBLEMS.map((e) => (
+                <button key={e.id} type="button" aria-label={e.id} aria-pressed={e.id === emblem} onClick={() => setEmblem(e.id)}><img src={e.src} alt="" /></button>
+              ))}
+            </div>
+            <input className="charter-input" value={name} onChange={(e) => setName(e.target.value)} maxLength={20} placeholder="اسم الأسطول" />
+            <input className="charter-input" value={motto} onChange={(e) => setMotto(e.target.value)} maxLength={80} placeholder="شعار قصير (اختياري)" />
+            {error && <p className="council-error">{error}</p>}
+            <div className="charter-actions">
+              <button type="button" className="charter-cancel" onClick={() => setCreating(false)}>إلغاء</button>
+              <button type="button" className="charter-seal" disabled={name.trim().length < 2} onClick={doCreate}>اختم الميثاق</button>
+            </div>
+          </section>
+        </div>
+      )}
     </main>
   );
 }

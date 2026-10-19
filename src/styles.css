@@ -2678,3 +2678,263 @@
 .btn-bronze { background: linear-gradient(180deg, oklch(0.72 0.11 65), oklch(0.5 0.09 55)); color: oklch(0.15 0.03 240); font-weight: 700; border-radius: 10px; }
 .btn-plain { border: 1px solid oklch(0.78 0.12 75 / .35); border-radius: 10px; }
 
+
+/* ================= Pirate Bay rebuild — original window system ================= */
+:root {
+  --bay-ink: oklch(0.17 0.035 245);
+  --bay-deep: oklch(0.22 0.045 240);
+  --bay-steel: oklch(0.32 0.04 235);
+  --bay-bronze: oklch(0.68 0.11 65);
+  --bay-bronze-hi: oklch(0.82 0.12 78);
+  --bay-red: oklch(0.6 0.2 28);
+  --bay-sea: oklch(0.66 0.12 205);
+  --bay-glow: 0 0 0 1px color-mix(in oklab, var(--bay-bronze) 55%, transparent), 0 10px 28px -12px var(--hud-shadow);
+  --bay-plate: linear-gradient(180deg, color-mix(in oklab, var(--bay-steel) 90%, transparent), color-mix(in oklab, var(--bay-ink) 95%, transparent));
+}
+.bay-btn, .charter-seal, .banner-join, .isle-claim, .haul-ok, .voyage-claim:not(:disabled), .council-charter-btn, .sheet-btn {
+  font-weight: 800; color: var(--bay-ink); border: 0; cursor: pointer;
+  background: linear-gradient(180deg, var(--bay-bronze-hi), var(--bay-bronze));
+  box-shadow: inset 0 1px 0 color-mix(in oklab, var(--hud-text) 55%, transparent), inset 0 -3px 0 color-mix(in oklab, var(--bay-ink) 30%, transparent), 0 6px 14px -6px var(--hud-shadow);
+  border-radius: 999px; transition: transform .15s, filter .15s;
+}
+:is(.charter-seal, .banner-join, .isle-claim, .haul-ok, .voyage-claim, .council-charter-btn, .sheet-btn):hover:not(:disabled) { filter: brightness(1.08); transform: translateY(-1px); }
+:is(.charter-seal, .banner-join, .isle-claim, .haul-ok, .council-charter-btn, .sheet-btn):active { transform: translateY(1px); }
+:is(.charter-seal, .council-charter-btn):disabled { opacity: .45; cursor: not-allowed; }
+
+/* ---------- 1. micro net thread above boats ---------- */
+.net-thread {
+  position: absolute; left: 50%; bottom: calc(100% - 0.4rem); transform: translateX(-50%);
+  display: flex; align-items: center; gap: .3rem; padding: .12rem .35rem; z-index: 3;
+  border-radius: 999px; background: color-mix(in oklab, var(--bay-ink) 70%, transparent);
+  backdrop-filter: blur(4px); pointer-events: none; white-space: nowrap;
+  font-size: .55rem; color: var(--hud-text); animation: thread-in .35s ease-out;
+}
+.net-thread b { color: var(--bay-bronze-hi); font-weight: 900; }
+.net-thread span { width: 3.4rem; height: .26rem; border-radius: 999px; background: color-mix(in oklab, var(--hud-text) 15%, transparent); overflow: hidden; }
+.net-thread i { display: block; height: 100%; background: linear-gradient(90deg, var(--bay-sea), var(--bay-bronze-hi)); transition: width .5s linear; }
+.net-thread em { font-style: normal; font-variant-numeric: tabular-nums; opacity: .85; }
+.net-thread.is-full i { background: var(--bay-bronze-hi); animation: thread-pulse 1s ease-in-out infinite; }
+.net-thread.is-full em { color: var(--bay-bronze-hi); font-weight: 800; }
+@keyframes thread-in { from { opacity: 0; transform: translate(-50%, 4px); } }
+@keyframes thread-pulse { 50% { opacity: .55; } }
+
+/* haul ticket */
+.haul-ticket {
+  position: relative; width: min(22rem, 88%); padding: 2.2rem 1.2rem 1.2rem; border-radius: 1.4rem; text-align: center; color: var(--hud-text);
+  background: radial-gradient(120% 80% at 50% 0%, color-mix(in oklab, var(--bay-sea) 30%, transparent), transparent 60%), var(--bay-plate);
+  box-shadow: var(--bay-glow); animation: ticket-rise .45s cubic-bezier(.2,1.3,.4,1);
+}
+.haul-ribbon { position: absolute; top: -.9rem; left: 50%; transform: translateX(-50%); padding: .4rem 1.4rem; border-radius: .5rem; font-family: "Aref Ruqaa", serif; font-size: 1.15rem; color: var(--bay-ink); background: linear-gradient(180deg, var(--bay-bronze-hi), var(--bay-bronze)); box-shadow: 0 6px 14px -6px var(--hud-shadow); white-space: nowrap; }
+.haul-fish { display: flex; flex-wrap: wrap; justify-content: center; gap: .6rem; margin: .4rem 0 1rem; }
+.haul-fish-item { display: grid; justify-items: center; width: 4.4rem; padding: .5rem .2rem; border-radius: 1rem; background: color-mix(in oklab, var(--bay-ink) 60%, transparent); animation: fish-pop .4s backwards ease-out; }
+.haul-fish-item img { width: 2.6rem; height: 2.6rem; object-fit: contain; }
+.haul-fish-item b { color: var(--bay-bronze-hi); font-size: .9rem; }
+.haul-fish-item span { font-size: .65rem; color: var(--hud-subtle); }
+.haul-none { color: var(--hud-subtle); font-size: .85rem; }
+.haul-total { display: flex; justify-content: space-between; padding: .6rem .9rem; margin-bottom: .9rem; border-radius: .8rem; border: 1px dashed color-mix(in oklab, var(--bay-bronze) 60%, transparent); font-size: .85rem; }
+.haul-total strong { color: var(--bay-bronze-hi); }
+.haul-ok { width: 100%; padding: .7rem; font-size: .95rem; }
+@keyframes ticket-rise { from { opacity: 0; transform: translateY(30px) scale(.92); } }
+@keyframes fish-pop { from { opacity: 0; transform: scale(.5); } }
+
+/* ---------- quests: voyage log ---------- */
+.voyage-log { color: var(--hud-text); display: grid; gap: .8rem; }
+.voyage-head { display: flex; align-items: center; gap: .7rem; }
+.voyage-head h2 { font-family: "Aref Ruqaa", serif; font-size: 1.3rem; color: var(--bay-bronze-hi); line-height: 1.1; }
+.voyage-head p { font-size: .75rem; color: var(--hud-subtle); }
+.voyage-compass { width: 2.2rem; height: 2.2rem; color: var(--bay-bronze-hi); animation: spin-slow 14s linear infinite; }
+.voyage-gems { margin-inline-start: auto; display: flex; gap: .3rem; align-items: center; padding: .3rem .7rem; border-radius: 999px; background: color-mix(in oklab, var(--bay-ink) 70%, transparent); font-weight: 800; }
+.voyage-gems img, .voyage-claim img { width: 1rem; height: 1rem; }
+.voyage-meter { position: relative; height: 1.1rem; border-radius: 999px; background: color-mix(in oklab, var(--bay-ink) 70%, transparent); overflow: hidden; }
+.voyage-meter span { position: absolute; inset-block: 0; inset-inline-start: 0; background: linear-gradient(90deg, var(--bay-sea), var(--bay-bronze)); transition: width .4s; }
+.voyage-meter small { position: relative; display: block; text-align: center; font-size: .65rem; line-height: 1.1rem; font-weight: 800; }
+.voyage-route { position: relative; display: grid; gap: .55rem; padding-inline-start: 1.1rem; }
+.voyage-route::before { content: ""; position: absolute; inset-block: .8rem; inset-inline-start: .55rem; border-inline-start: 2px dashed color-mix(in oklab, var(--bay-bronze) 50%, transparent); }
+.voyage-stop { position: relative; display: flex; align-items: center; gap: .7rem; padding: .6rem .8rem; border-radius: 1rem; background: var(--bay-plate); box-shadow: 0 0 0 1px var(--hud-edge); }
+.voyage-stop.is-ready { box-shadow: 0 0 0 1.5px var(--bay-bronze-hi), 0 0 18px -6px var(--bay-bronze-hi); }
+.voyage-stop.is-taken { opacity: .6; }
+.voyage-pin { position: absolute; inset-inline-start: -1.15rem; width: 1.2rem; height: 1.2rem; display: grid; place-items: center; border-radius: 50%; font-size: .65rem; font-weight: 900; color: var(--bay-ink); background: var(--bay-bronze); }
+.voyage-icon { width: 2.6rem; height: 2.6rem; object-fit: contain; flex-shrink: 0; }
+.voyage-copy { flex: 1; min-width: 0; display: grid; gap: .15rem; }
+.voyage-copy strong { font-size: .9rem; }
+.voyage-copy small { font-size: .7rem; color: var(--hud-subtle); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.voyage-bar { height: .3rem; border-radius: 999px; background: color-mix(in oklab, var(--hud-text) 12%, transparent); overflow: hidden; }
+.voyage-bar i { display: block; height: 100%; background: var(--bay-sea); }
+.voyage-claim { display: flex; align-items: center; gap: .25rem; min-width: 4.4rem; justify-content: center; padding: .45rem .7rem; border-radius: 999px; font-size: .75rem; font-weight: 800; }
+.voyage-claim:disabled { background: color-mix(in oklab, var(--bay-ink) 70%, transparent); color: var(--hud-subtle); border: 0; }
+@keyframes spin-slow { to { transform: rotate(360deg); } }
+
+/* ---------- daily: seven isles ---------- */
+.isle-overlay { position: fixed; inset: 0; z-index: 80; display: grid; place-items: center; background: color-mix(in oklab, var(--bay-ink) 65%, transparent); backdrop-filter: blur(6px); }
+.isle-card { position: relative; width: min(24rem, 90%); padding: 1.4rem 1.2rem; border-radius: 1.6rem; text-align: center; color: var(--hud-text); background: radial-gradient(100% 70% at 50% 20%, color-mix(in oklab, var(--bay-bronze) 30%, transparent), transparent 65%), var(--bay-plate); box-shadow: var(--bay-glow); animation: ticket-rise .5s cubic-bezier(.2,1.3,.4,1); }
+.isle-x { position: absolute; top: .8rem; inset-inline-end: .8rem; padding: .35rem; border-radius: 50%; background: color-mix(in oklab, var(--bay-ink) 70%, transparent); color: var(--hud-subtle); }
+.isle-kicker { font-size: .75rem; color: var(--hud-subtle); letter-spacing: .05em; }
+.isle-prize { display: grid; justify-items: center; margin: .6rem 0 1rem; }
+.isle-prize img { width: 5.5rem; height: 5.5rem; object-fit: contain; filter: drop-shadow(0 0 18px color-mix(in oklab, var(--bay-bronze-hi) 70%, transparent)); animation: prize-float 2.6s ease-in-out infinite; }
+.isle-prize strong { font-family: "Aref Ruqaa", serif; font-size: 1.8rem; color: var(--bay-bronze-hi); }
+.isle-route { position: relative; display: flex; justify-content: space-between; margin: 0 .2rem 1rem; }
+.isle-route::before { content: ""; position: absolute; top: 1.05rem; inset-inline: 1rem; height: 2px; background: repeating-linear-gradient(90deg, var(--bay-bronze) 0 6px, transparent 6px 11px); }
+.isle-route li { position: relative; display: grid; justify-items: center; gap: .2rem; }
+.isle-dot { width: 2.1rem; height: 2.1rem; display: grid; place-items: center; border-radius: 50%; background: var(--bay-ink); box-shadow: 0 0 0 2px var(--hud-edge); }
+.isle-dot img { width: 1.3rem; height: 1.3rem; object-fit: contain; }
+.isle-route small { font-size: .6rem; color: var(--hud-subtle); }
+.isle-route .is-past .isle-dot { background: color-mix(in oklab, var(--bay-sea) 40%, var(--bay-ink)); opacity: .7; }
+.isle-route .is-now .isle-dot { box-shadow: 0 0 0 2px var(--bay-bronze-hi), 0 0 14px var(--bay-bronze-hi); transform: scale(1.15); }
+.isle-hint { font-size: .75rem; color: var(--hud-subtle); margin-bottom: .8rem; }
+.isle-claim { width: 100%; padding: .8rem; font-size: 1rem; }
+@keyframes prize-float { 50% { transform: translateY(-6px) rotate(-3deg); } }
+
+/* ---------- 2. fleet council ---------- */
+.council { color: var(--hud-text); display: grid; gap: .9rem; padding: .2rem; }
+.council-top { display: flex; align-items: center; gap: .6rem; }
+.council-back { display: grid; place-items: center; width: 2.2rem; height: 2.2rem; border-radius: 50%; background: color-mix(in oklab, var(--bay-ink) 70%, transparent); color: var(--hud-text); flex-shrink: 0; }
+.council-switch { display: flex; padding: .25rem; border-radius: 999px; background: color-mix(in oklab, var(--bay-ink) 75%, transparent); box-shadow: inset 0 0 0 1px var(--hud-edge); }
+.council-switch button { display: flex; align-items: center; gap: .3rem; padding: .4rem .9rem; border-radius: 999px; font-size: .8rem; font-weight: 700; color: var(--hud-subtle); }
+.council-switch button[aria-selected="true"] { color: var(--bay-ink); background: linear-gradient(180deg, var(--bay-sea), color-mix(in oklab, var(--bay-sea) 70%, var(--bay-ink))); }
+.council-switch button:disabled { opacity: .4; }
+.council-charter-btn { margin-inline-start: auto; display: flex; align-items: center; gap: .3rem; padding: .5rem 1rem; font-size: .8rem; }
+.council-error { display: flex; justify-content: space-between; gap: .5rem; padding: .6rem .8rem; border-radius: .8rem; font-size: .8rem; background: color-mix(in oklab, var(--bay-red) 25%, transparent); }
+.council-loading { display: grid; place-items: center; padding: 3rem; color: var(--bay-bronze-hi); }
+.council-empty { grid-column: 1 / -1; text-align: center; padding: 2rem; color: var(--hud-subtle); }
+.banner-wall { display: grid; grid-template-columns: repeat(auto-fill, minmax(8.2rem, 1fr)); gap: .8rem; }
+.banner-flag { position: relative; display: grid; justify-items: center; gap: .25rem; padding: 1.4rem .6rem 1.6rem; text-align: center; background: var(--bay-plate); clip-path: polygon(0 0, 100% 0, 100% 88%, 50% 100%, 0 88%); box-shadow: inset 0 3px 0 var(--bay-bronze); transition: transform .2s; }
+.banner-flag:hover { transform: translateY(-3px); }
+.banner-flag.top-1 { box-shadow: inset 0 3px 0 var(--bay-bronze-hi), inset 0 0 30px -10px var(--bay-bronze-hi); }
+.banner-flag.is-mine { box-shadow: inset 0 3px 0 var(--bay-sea), inset 0 0 30px -10px var(--bay-sea); }
+.banner-place { position: absolute; top: .35rem; inset-inline-start: .45rem; font-size: .7rem; font-weight: 900; color: var(--bay-bronze-hi); }
+.banner-flag img { width: 3.4rem; height: 3.4rem; object-fit: contain; filter: drop-shadow(0 4px 8px var(--hud-shadow)); }
+.banner-flag strong { font-size: .85rem; }
+.banner-flag small { font-size: .65rem; color: var(--hud-subtle); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.banner-score { display: flex; align-items: center; gap: .2rem; font-size: .75rem; color: var(--bay-bronze-hi); }
+.banner-join { margin-top: .3rem; padding: .3rem 1.1rem; font-size: .75rem; }
+.council-mine { display: grid; gap: .9rem; }
+.banner-hall { display: grid; grid-template-columns: auto 1fr; gap: .4rem 1rem; align-items: center; padding: 1rem; border-radius: 1.2rem; background: radial-gradient(80% 120% at 100% 0%, color-mix(in oklab, var(--bay-bronze) 25%, transparent), transparent 60%), var(--bay-plate); box-shadow: var(--bay-glow); }
+.banner-hall img { width: 4.6rem; height: 4.6rem; object-fit: contain; grid-row: span 2; }
+.banner-hall h2 { font-family: "Aref Ruqaa", serif; font-size: 1.5rem; color: var(--bay-bronze-hi); }
+.banner-hall p { font-size: .8rem; color: var(--hud-subtle); }
+.banner-hall dl { grid-column: 2; display: flex; gap: .5rem; }
+.banner-hall dl div { padding: .3rem .7rem; border-radius: .7rem; background: color-mix(in oklab, var(--bay-ink) 65%, transparent); text-align: center; }
+.banner-hall dt { font-size: .6rem; color: var(--hud-subtle); }
+.banner-hall dd { font-weight: 800; font-size: .85rem; }
+.council-columns { display: grid; grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr)); gap: .8rem; }
+.council-panel { padding: .8rem; border-radius: 1rem; background: color-mix(in oklab, var(--bay-ink) 60%, transparent); box-shadow: inset 0 0 0 1px var(--hud-edge); }
+.council-panel h3 { display: flex; align-items: center; gap: .35rem; margin-bottom: .6rem; font-size: .85rem; color: var(--bay-bronze-hi); }
+.duty-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; }
+.duty-tile { display: grid; gap: .2rem; padding: .7rem .5rem; border-radius: .8rem; text-align: center; font-size: .75rem; color: var(--hud-text); background: var(--bay-plate); box-shadow: inset 0 0 0 1px var(--hud-edge); transition: box-shadow .2s; }
+.duty-tile:hover { box-shadow: inset 0 0 0 1.5px var(--bay-sea); }
+.duty-tile b { color: var(--bay-sea); font-size: .95rem; }
+.crew-roll { display: grid; gap: .35rem; max-height: 16rem; overflow: auto; }
+.crew-roll li { display: grid; grid-template-columns: auto 1fr auto auto auto; align-items: center; gap: .5rem; padding: .35rem .5rem; border-radius: .7rem; background: color-mix(in oklab, var(--bay-steel) 40%, transparent); font-size: .8rem; }
+.crew-roll-face { width: 1.9rem; height: 1.9rem; border-radius: 50%; overflow: hidden; }
+.crew-roll em { font-style: normal; font-size: .7rem; color: var(--bay-bronze-hi); }
+.rank-chip { padding: .1rem .45rem; border-radius: 999px; font-size: .6rem; background: color-mix(in oklab, var(--hud-text) 12%, transparent); }
+.rank-leader { background: var(--bay-bronze); color: var(--bay-ink); }
+.rank-officer { background: color-mix(in oklab, var(--bay-sea) 50%, transparent); }
+.crew-roll-act { padding: .3rem; border-radius: 50%; color: var(--bay-bronze-hi); background: color-mix(in oklab, var(--bay-ink) 70%, transparent); }
+.council-leave { justify-self: center; display: flex; align-items: center; gap: .3rem; padding: .4rem 1rem; border-radius: 999px; font-size: .75rem; color: var(--hud-subtle); box-shadow: inset 0 0 0 1px var(--hud-edge); }
+.council-leave:hover { color: var(--bay-red); box-shadow: inset 0 0 0 1px var(--bay-red); }
+.charter-overlay { position: absolute; inset: 0; z-index: 20; display: grid; place-items: center; background: color-mix(in oklab, var(--bay-ink) 70%, transparent); backdrop-filter: blur(4px); }
+.charter { width: min(22rem, 92%); display: grid; gap: .65rem; padding: 1.2rem; border-radius: 1.3rem; background: var(--bay-plate); box-shadow: var(--bay-glow); animation: ticket-rise .4s cubic-bezier(.2,1.3,.4,1); }
+.charter h2 { text-align: center; font-family: "Aref Ruqaa", serif; font-size: 1.35rem; color: var(--bay-bronze-hi); }
+.charter-preview { display: grid; justify-items: center; padding: .8rem; border-radius: 1rem; background: color-mix(in oklab, var(--bay-ink) 65%, transparent); }
+.charter-preview img { width: 3.8rem; height: 3.8rem; object-fit: contain; }
+.charter-preview small { font-size: .7rem; color: var(--hud-subtle); }
+.charter-emblems { display: flex; gap: .4rem; overflow-x: auto; padding-bottom: .2rem; }
+.charter-emblems button { flex-shrink: 0; padding: .3rem; border-radius: .7rem; background: color-mix(in oklab, var(--bay-ink) 60%, transparent); box-shadow: inset 0 0 0 1px var(--hud-edge); }
+.charter-emblems button[aria-pressed="true"] { box-shadow: inset 0 0 0 2px var(--bay-bronze-hi); }
+.charter-emblems img { width: 2.2rem; height: 2.2rem; object-fit: contain; }
+.charter-input { width: 100%; padding: .6rem .8rem; border-radius: .7rem; font-size: .85rem; color: var(--hud-text); background: color-mix(in oklab, var(--bay-ink) 75%, transparent); border: 1px solid var(--hud-edge); outline: none; }
+.charter-input:focus { border-color: var(--bay-bronze-hi); }
+.charter-actions { display: flex; gap: .5rem; }
+.charter-cancel { flex: 1; padding: .6rem; border-radius: 999px; color: var(--hud-subtle); box-shadow: inset 0 0 0 1px var(--hud-edge); }
+.charter-seal { flex: 2; padding: .6rem; }
+
+/* ---------- 3. captains registry ---------- */
+.registry { position: relative; display: grid; gap: .8rem; color: var(--hud-text); }
+.registry-top { display: grid; gap: .5rem; }
+.registry-search { display: flex; align-items: center; gap: .5rem; padding: .55rem .9rem; border-radius: 999px; background: color-mix(in oklab, var(--bay-ink) 75%, transparent); box-shadow: inset 0 0 0 1px var(--hud-edge); color: var(--hud-subtle); }
+.registry-search:focus-within { box-shadow: inset 0 0 0 1.5px var(--bay-sea); }
+.registry-search input { flex: 1; background: transparent; outline: none; color: var(--hud-text); font-size: .85rem; }
+.registry-boards { display: grid; grid-template-columns: repeat(4, 1fr); gap: .35rem; }
+.registry-boards button { display: grid; justify-items: center; gap: .15rem; padding: .45rem .2rem; border-radius: .8rem; font-size: .65rem; color: var(--hud-subtle); background: color-mix(in oklab, var(--bay-ink) 55%, transparent); }
+.registry-boards button[aria-selected="true"] { color: var(--bay-bronze-hi); background: var(--bay-plate); box-shadow: inset 0 -2px 0 var(--bay-bronze-hi); }
+.registry-podium { display: grid; grid-template-columns: 1fr 1.15fr 1fr; align-items: end; gap: .5rem; }
+.podium-step { position: relative; display: grid; justify-items: center; gap: .15rem; padding: .7rem .3rem 1.6rem; border-radius: 1rem 1rem .4rem .4rem; background: var(--bay-plate); box-shadow: inset 0 0 0 1px var(--hud-edge); color: var(--hud-text); }
+.podium-step.place-1 { padding-top: 1.1rem; box-shadow: inset 0 0 0 1.5px var(--bay-bronze-hi), 0 0 24px -10px var(--bay-bronze-hi); }
+.podium-step strong { font-size: .8rem; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.podium-step span { font-size: .65rem; color: var(--hud-subtle); }
+.podium-step b { position: absolute; bottom: .3rem; font-family: "Aref Ruqaa", serif; font-size: 1.1rem; color: var(--bay-bronze-hi); }
+.podium-face { width: 3rem; height: 3rem; border-radius: 50%; overflow: hidden; box-shadow: 0 0 0 2px var(--bay-bronze); }
+.place-1 .podium-face { width: 3.6rem; height: 3.6rem; box-shadow: 0 0 0 2px var(--bay-bronze-hi); }
+.registry-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr)); gap: .5rem; }
+.captain-card { width: 100%; display: grid; grid-template-columns: auto auto 1fr; grid-template-rows: auto auto; column-gap: .45rem; align-items: center; padding: .5rem .6rem; border-radius: .9rem; text-align: start; color: var(--hud-text); background: color-mix(in oklab, var(--bay-ink) 60%, transparent); box-shadow: inset 0 0 0 1px var(--hud-edge); transition: box-shadow .2s, transform .2s; }
+.captain-card:hover { box-shadow: inset 0 0 0 1.5px var(--bay-sea); transform: translateY(-1px); }
+.captain-card.is-me { box-shadow: inset 0 0 0 1.5px var(--bay-bronze-hi); }
+.captain-card-no { grid-row: span 2; font-size: .7rem; font-weight: 900; color: var(--bay-bronze-hi); min-width: .8rem; }
+.captain-card-face { grid-row: span 2; width: 2.2rem; height: 2.2rem; border-radius: 50%; overflow: hidden; }
+.captain-card strong { font-size: .8rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.captain-card span:last-child { font-size: .65rem; color: var(--hud-subtle); }
+.captain-sheet { position: absolute; inset: 0; z-index: 15; display: grid; align-items: end; background: color-mix(in oklab, var(--bay-ink) 55%, transparent); }
+.captain-sheet section { display: grid; justify-items: center; gap: .3rem; padding: 1.2rem 1rem 1rem; border-radius: 1.3rem 1.3rem 0 0; background: var(--bay-plate); box-shadow: var(--bay-glow); animation: sheet-up .3s ease-out; }
+.captain-sheet-face { width: 4.2rem; height: 4.2rem; border-radius: 50%; overflow: hidden; box-shadow: 0 0 0 3px var(--bay-bronze); margin-top: -2.6rem; }
+.captain-sheet h3 { font-size: 1.1rem; font-weight: 800; }
+.captain-sheet p { font-size: .75rem; color: var(--hud-subtle); }
+.captain-sheet-acts { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; width: 100%; margin-top: .4rem; }
+.sheet-btn { display: flex; align-items: center; justify-content: center; gap: .4rem; padding: .7rem; font-size: .85rem; border-radius: .9rem; }
+.sheet-btn.talk { background: linear-gradient(180deg, var(--bay-sea), color-mix(in oklab, var(--bay-sea) 65%, var(--bay-ink))); }
+.sheet-btn.hit { color: var(--hud-text); background: linear-gradient(180deg, var(--bay-red), color-mix(in oklab, var(--bay-red) 60%, var(--bay-ink))); }
+.captain-sheet-close { margin-top: .3rem; font-size: .75rem; color: var(--hud-subtle); }
+@keyframes sheet-up { from { transform: translateY(100%); } }
+
+/* ---------- radio chat ---------- */
+.chat-room .chat-message-list { background: repeating-linear-gradient(0deg, transparent 0 22px, color-mix(in oklab, var(--bay-sea) 5%, transparent) 22px 23px); }
+.chat-room form .rounded-lg { border-radius: 999px; }
+.chat-room .chat-conversation .dock-tabs { display: flex; gap: .3rem; padding: .4rem; margin: .4rem; border-radius: 999px; background: color-mix(in oklab, var(--bay-ink) 70%, transparent); }
+.chat-room .chat-conversation .dock-tabs > * { flex: 1; border-radius: 999px; }
+.chat-room .chat-conversation .dock-tabs > .active { background: linear-gradient(180deg, var(--bay-sea), color-mix(in oklab, var(--bay-sea) 70%, var(--bay-ink))); color: var(--bay-ink); }
+
+/* ---------- 4. vault ---------- */
+.vault { display: grid; grid-template-columns: 6.2rem 1fr; gap: .8rem; color: var(--hud-text); min-height: 100%; }
+.vault-rail { display: grid; align-content: start; gap: .35rem; padding: .4rem; border-radius: 1rem; background: color-mix(in oklab, var(--bay-ink) 70%, transparent); }
+.vault-rail button { padding: .6rem .3rem; border-radius: .7rem; font-size: .75rem; font-weight: 700; color: var(--hud-subtle); }
+.vault-rail button[aria-selected="true"] { color: var(--bay-bronze-hi); background: var(--bay-plate); box-shadow: inset -3px 0 0 var(--bay-bronze-hi); }
+.vault-rail small { margin-top: .4rem; text-align: center; font-size: .6rem; color: var(--hud-subtle); }
+.vault-main { display: grid; align-content: start; gap: .7rem; min-width: 0; }
+.vault-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(4.2rem, 1fr)); gap: .45rem; }
+.vault-slot { position: relative; display: grid; place-items: center; width: 100%; aspect-ratio: 1; border-radius: .8rem; background: radial-gradient(circle at 50% 35%, color-mix(in oklab, var(--bay-steel) 80%, transparent), var(--bay-ink)); box-shadow: inset 0 0 0 1px var(--hud-edge), inset 0 -6px 12px -6px var(--hud-shadow); transition: box-shadow .2s; }
+.vault-slot img, .vault-slot > * { max-width: 78%; max-height: 78%; object-fit: contain; }
+.vault-slot b { position: absolute; bottom: .2rem; inset-inline-end: .3rem; font-size: .6rem; font-weight: 900; color: var(--bay-bronze-hi); }
+.vault-slot.is-on { box-shadow: inset 0 0 0 2px var(--bay-bronze-hi), 0 0 16px -6px var(--bay-bronze-hi); }
+.vault-slot.is-empty { opacity: .35; }
+.vault-detail { display: flex; justify-content: space-between; padding: .6rem .8rem; border-radius: .8rem; font-size: .8rem; background: color-mix(in oklab, var(--bay-ink) 60%, transparent); color: var(--hud-subtle); }
+.vault-detail strong { color: var(--hud-text); }
+.vault-harbor { position: relative; border-radius: 1rem; overflow: hidden; }
+.vault-harbor img { width: 100%; aspect-ratio: 16/9; object-fit: cover; }
+.vault-harbor div { position: absolute; inset-inline: 0; bottom: 0; display: grid; padding: .7rem; background: linear-gradient(0deg, var(--bay-ink), transparent); }
+.vault-harbor span { font-size: .7rem; color: var(--hud-subtle); }
+
+/* ---------- chronicle ---------- */
+.chronicle { display: grid; gap: .8rem; color: var(--hud-text); }
+.chronicle-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: .4rem; }
+.chronicle-tabs button { display: flex; align-items: center; justify-content: center; gap: .35rem; padding: .6rem; border-radius: .9rem; font-size: .8rem; font-weight: 700; color: var(--hud-subtle); background: color-mix(in oklab, var(--bay-ink) 60%, transparent); }
+.chronicle-tabs button[aria-selected="true"] { color: var(--hud-text); background: var(--bay-plate); box-shadow: inset 0 -2px 0 var(--bay-bronze-hi); }
+.chronicle-line { position: relative; padding-inline-start: 1.2rem; border-inline-start: 2px dashed color-mix(in oklab, var(--bay-bronze) 40%, transparent); }
+
+/* ---------- settings: helm ---------- */
+.helm { display: grid; gap: .9rem; color: var(--hud-text); }
+.helm-id { display: flex; align-items: center; gap: .8rem; padding: .9rem; border-radius: 1.2rem; background: radial-gradient(80% 120% at 0% 0%, color-mix(in oklab, var(--bay-sea) 25%, transparent), transparent 60%), var(--bay-plate); box-shadow: var(--bay-glow); }
+.helm-face { width: 3.6rem; height: 3.6rem; border-radius: 1rem; overflow: hidden; box-shadow: 0 0 0 2px var(--bay-bronze); }
+.helm-id h2 { font-size: 1.1rem; font-weight: 800; }
+.helm-id p { display: flex; align-items: center; gap: .25rem; font-size: .7rem; color: var(--hud-aqua); }
+.helm-levers { display: grid; grid-template-columns: repeat(3, 1fr); gap: .6rem; }
+.helm-lever { display: grid; justify-items: center; gap: .25rem; padding: 1rem .4rem; border-radius: 1rem; color: var(--hud-subtle); background: color-mix(in oklab, var(--bay-ink) 65%, transparent); box-shadow: inset 0 0 0 1px var(--hud-edge); transition: all .2s; }
+.helm-lever.is-on { color: var(--hud-text); background: var(--bay-plate); box-shadow: inset 0 0 0 1.5px var(--bay-sea), 0 0 18px -8px var(--bay-sea); }
+.helm-lever-icon { display: grid; place-items: center; width: 2.4rem; height: 2.4rem; border-radius: 50%; background: color-mix(in oklab, var(--bay-ink) 70%, transparent); }
+.helm-lever.is-on .helm-lever-icon { color: var(--bay-sea); }
+.helm-lever strong { font-size: .85rem; }
+.helm-lever small { font-size: .62rem; text-align: center; }
+.helm-lever-state { font-style: normal; font-size: .6rem; padding: .1rem .5rem; border-radius: 999px; background: color-mix(in oklab, var(--hud-text) 10%, transparent); }
+.helm-lever.is-on .helm-lever-state { background: var(--bay-sea); color: var(--bay-ink); font-weight: 800; }
+.helm-admin { display: flex; justify-content: center; align-items: center; gap: .4rem; padding: .6rem; border-radius: .9rem; font-size: .8rem; color: var(--bay-bronze-hi); box-shadow: inset 0 0 0 1px var(--bay-bronze); }
+.helm-logout { display: flex; justify-content: center; align-items: center; gap: .4rem; padding: .65rem; border-radius: 999px; font-size: .85rem; color: var(--hud-text); background: color-mix(in oklab, var(--bay-red) 35%, var(--bay-ink)); }
+@media (prefers-reduced-motion: reduce) { .voyage-compass, .isle-prize img, .net-thread.is-full i { animation: none; } }

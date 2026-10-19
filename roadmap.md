@@ -1,28 +1,6 @@
-# Roadmap
-- [ ] Unify store and map ship market with shared ownership and fishing details.
-- [ ] Allow recall at any time; cap catch at trip duration and wait offshore until recalled.
-- [ ] Refine all shared window frames, transparent catch rows and a custom fish-market illustration.
-- [ ] Improve admin export for adopting permanent artwork defaults (actual adoption awaits owner's export).
-- [ ] Prevent pinch zoom inside the game on phones.
-- [ ] Add an explicitly labeled Saudi demo community without fake real-user records.
-- [x] Current request: connect developer studio poses to sea boats with live refresh.
-- [x] Current request: move day/night indicator below the upper HUD.
-- [x] Current request: repair and restyle settings, tribe, and messages windows.
-- [x] Current request: correct Vercel configuration and document required environment values.
-- [x] Make the hidden fleet calibration panel draggable within the sea scene.
-- [x] Rework all seven dock destinations without changing the dock artwork: chat, rankings, inventory, store, alerts, enemies, tribe.
-- [x] Rebalance the captain portrait, gift, and resource display in the top bar.
-- [x] Verify the game at desktop and phone widths, including calibration dragging and dock interactions.
-
-## Existing follow-up work
-- [ ] Rebuild the admin studio around the actual ship catalog, pose artwork, and editable store pricing.
-- [ ] Make admin ship and rocket artwork uploads persist and appear in the store and live game.
-- [ ] Restore every island/ocean background from assets owned by this project.
-- [ ] Remove the floating sound control and keep its function inside settings.
-- [ ] Make the supplied fleet coordinates the shared defaults and verify publishing for new players.
-- [ ] Verify an actual Vercel deployment (configuration prepared; requires access to the user's Vercel account).
-- [ ] Replace legacy ship artwork across the island ship market and store with the unified catalog.
-- [ ] Redesign the island fish-market entry and remove its chart, selling flow, and quest list.
-- [x] Finish the tribe, messages, and settings window presentation; authenticated messaging requires the user's existing sign-in.
-- [x] Simplify sign-in, groups (3-step creation), radar, alerts and storage wording.
-- [ ] Complete actual purchases, inventory persistence, battle events, and damage/catch rankings when their gameplay and records are available.
+# Roadmap — window rebuild (store untouched)
+- [ ] 1. Micro fishing bar (only while fishing) + haul card; quest logbook; 7-day treasure route
+- [ ] 2. Fleet council (tribes) rebuild + one-step charter
+- [ ] 3. Captains registry cards + action sheet; radio chat restyle
+- [ ] 4. Vault inventory + detail; chronicle (alerts/enemies); captain cabin settings
+- Run all four phases without stopping between them.
