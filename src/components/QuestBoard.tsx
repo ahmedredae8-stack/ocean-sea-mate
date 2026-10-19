@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
-import { Check, Gift } from "lucide-react";
+import { Check, Compass } from "lucide-react";
 
 import { QUESTS, claim, isDone, loadQuests, type QuestState } from "@/lib/quests";
 import { playSfx } from "@/lib/sound";
 
-/** Daily quest board — shared by the fish market and the shipyard. */
+const GEM = "https://project--356242e8-144f-42b3-8292-474399c324ac.lovable.app/__l5e/assets-v1/81b9318d-8399-478f-bd28-abec7665a1a6/gem.png";
+
+/** Daily voyages logbook: one route of numbered stops, each with its own reward. */
 export function QuestBoard() {
   const [state, setState] = useState<QuestState | null>(null);
 
@@ -16,50 +18,43 @@ export function QuestBoard() {
   }, []);
 
   if (!state) return null;
+  const finished = QUESTS.filter((q) => state.claimed.includes(q.id)).length;
 
   return (
-    <section className="quest-board">
-      <header className="quest-head">
-        <img src="https://project--356242e8-144f-42b3-8292-474399c324ac.lovable.app/__l5e/assets-v1/1b52eadc-9045-47f2-9648-efe6cc13c79c/quest.png" alt="" className="h-7 w-7 object-contain" />
-        <h2>مهامك اليوم</h2>
-        <span className="quest-gems">
-          <img src="https://project--356242e8-144f-42b3-8292-474399c324ac.lovable.app/__l5e/assets-v1/81b9318d-8399-478f-bd28-abec7665a1a6/gem.png" alt="" className="h-4 w-4" />
-          {state.gems}
-        </span>
+    <section className="voyage-log" dir="rtl">
+      <header className="voyage-head">
+        <Compass className="voyage-compass" />
+        <div><h2>رحلات اليوم</h2><p>أنجز الرحلة واستلم جواهرها</p></div>
+        <span className="voyage-gems"><img src={GEM} alt="" />{state.gems}</span>
       </header>
-
-      <ul className="grid gap-2">
-        {QUESTS.map((q) => {
+      <div className="voyage-meter"><span style={{ width: `${(finished / Math.max(1, QUESTS.length)) * 100}%` }} /><small>{finished} من {QUESTS.length}</small></div>
+      <ol className="voyage-route">
+        {QUESTS.map((q, i) => {
           const done = isDone(state, q);
           const taken = state.claimed.includes(q.id);
-          const pct = Math.min(100, Math.round(((state.progress[q.id] ?? 0) / q.goal) * 100));
+          const have = Math.min(q.goal, state.progress[q.id] ?? 0);
+          const pct = Math.round((have / q.goal) * 100);
           return (
-            <li key={q.id} className={`quest-row ${done ? "quest-row-done" : ""}`}>
-              <img src={q.icon} alt="" className="h-10 w-10 shrink-0 object-contain drop-shadow" />
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-black">{q.title}</p>
-                <p className="truncate text-[11px] text-white/50">{q.hint}</p>
-                <div className="quest-bar">
-                  <span style={{ width: `${pct}%` }} />
-                </div>
+            <li key={q.id} className={`voyage-stop ${done ? "is-ready" : ""} ${taken ? "is-taken" : ""}`}>
+              <span className="voyage-pin">{taken ? <Check size={14} /> : i + 1}</span>
+              <img src={q.icon} alt="" className="voyage-icon" />
+              <div className="voyage-copy">
+                <strong>{q.title}</strong>
+                <small>{q.hint}</small>
+                <span className="voyage-bar"><i style={{ width: `${pct}%` }} /></span>
               </div>
               <button
                 type="button"
+                className="voyage-claim"
                 disabled={!done || taken}
-                onPointerEnter={() => playSfx("hover", 0.2)}
-                onClick={() => {
-                  playSfx("click", 0.8);
-                  setState((s) => (s ? claim(s, q.id) : s));
-                }}
-                className="quest-claim"
+                onClick={() => { playSfx("click", 0.8); setState((s) => (s ? claim(s, q.id) : s)); }}
               >
-                {taken ? <Check className="h-4 w-4" /> : <Gift className="h-4 w-4" />}
-                <span className="tabular-nums">{q.gems}</span>
+                {taken ? "تم" : done ? <>استلم <img src={GEM} alt="" />{q.gems}</> : `${have}/${q.goal}`}
               </button>
             </li>
           );
         })}
-      </ul>
+      </ol>
     </section>
   );
 }
