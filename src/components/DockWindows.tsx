@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { Bell, Crown, Fish, MessageCircle, Rocket, Search, Shield, Skull, Swords, Trophy, Users } from "lucide-react";
 import { playSfx } from "@/lib/sound";
 import { hulls } from "@/lib/fleetCatalog";
-import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { CaptainAvatar } from "@/components/GameSprite";
 import type { Player } from "@/lib/player";

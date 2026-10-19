@@ -3,7 +3,6 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ArrowRight, Eye, LogOut, Music2, Settings2, ShieldCheck, Waves } from "lucide-react";
 
 import { CaptainAvatar, nameSeed } from "@/components/GameSprite";
-import { Button } from "@/components/ui/button";
 import { usePlayer } from "@/hooks/usePlayer";
 import { signOutCaptain } from "@/lib/auth";
 import { clearPlayer } from "@/lib/player";
@@ -29,9 +28,22 @@ export function SettingsPage() {
   const toggleContrast = () => { const next = !contrast; setContrast(next); localStorage.setItem("ib.contrast", next ? "on" : "off"); document.documentElement.classList.toggle("game-contrast", next); };
   const logout = async () => { await signOutCaptain(); clearPlayer(); void navigate({ to: "/auth", replace: true }); };
 
-  return <main className="social-page" dir="rtl"><div className="social-wrap settings-wrap"><header className="social-titlebar"><Link to="/" className="icon-control" aria-label="رجوع"><ArrowRight /></Link><div><span>غرفة القيادة</span><h1>إعدادات القبطان</h1></div><Settings2 /></header><section className="account-banner"><CaptainAvatar seed={nameSeed(player?.name ?? "قبطان")} /><div><small>الحساب الحالي</small><h2>{player?.name ?? "قبطان الخليج"}</h2><p>{player ? "حساب القبطان" : "لم تسجل الدخول بعد"}</p></div><ShieldCheck /></section><section className="settings-panel"><h2 className="settings-section-title">تفضيلات الإبحار</h2><SettingRow icon={<Music2 />} title="أصوات اللعبة" detail="الأمواج والأزرار والمؤثرات" enabled={sound} onToggle={toggleSound} /><SettingRow icon={<Waves />} title="حركة المشهد" detail="حركة الخلفيات والعناصر" enabled={motion} onToggle={toggleMotion} /><SettingRow icon={<Eye />} title="وضوح أعلى" detail="زيادة تباين النصوص واللوحات" enabled={contrast} onToggle={toggleContrast} /></section>{admin && <Link to="/admin" className="dock-tab active" style={{ display: "flex", justifyContent: "center", marginBottom: "0.75rem" }}>استوديو وضعيات السفن والصواريخ</Link>}<Button variant="destructive" className="logout-button" onClick={logout}><LogOut /> تسجيل الخروج</Button></div></main>;
+  return <main className="helm" dir="rtl">
+    <section className="helm-id">
+      <Link to="/" className="council-back" aria-label="رجوع"><ArrowRight size={18} /></Link>
+      <CaptainAvatar seed={nameSeed(player?.name ?? "قبطان")} className="helm-face" />
+      <div><h2>{player?.name ?? "قبطان الخليج"}</h2><p><ShieldCheck size={13} />{player ? "مسجّل الدخول" : "غير مسجّل"}</p></div>
+    </section>
+    <section className="helm-levers">
+      <SettingRow icon={<Music2 />} title="الصوت" detail="الأمواج والمؤثرات" enabled={sound} onToggle={toggleSound} />
+      <SettingRow icon={<Waves />} title="الحركة" detail="حركة البحر والسفن" enabled={motion} onToggle={toggleMotion} />
+      <SettingRow icon={<Eye />} title="وضوح أعلى" detail="نصوص أوضح" enabled={contrast} onToggle={toggleContrast} />
+    </section>
+    {admin && <Link to="/admin" className="helm-admin"><Settings2 size={16} />استوديو السفن (للإدارة)</Link>}
+    <button type="button" className="helm-logout" onClick={logout}><LogOut size={16} />تسجيل الخروج</button>
+  </main>;
 }
 
 function SettingRow({ icon, title, detail, enabled, onToggle }: { icon: React.ReactNode; title: string; detail: string; enabled: boolean; onToggle: () => void }) {
-  return <div className="setting-row"><span className="setting-icon">{icon}</span><div><h3>{title}</h3><p>{detail}</p></div><Button variant="ghost" className={enabled ? "game-switch switch-on" : "game-switch"} onClick={onToggle} role="switch" aria-checked={enabled} aria-label={title}><span /></Button></div>;
+  return <button type="button" className={`helm-lever ${enabled ? "is-on" : ""}`} onClick={onToggle} role="switch" aria-checked={enabled} aria-label={title}><span className="helm-lever-icon">{icon}</span><strong>{title}</strong><small>{detail}</small><i className="helm-lever-state">{enabled ? "مفعّل" : "متوقف"}</i></button>;
 }
