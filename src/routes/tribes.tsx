@@ -2,7 +2,6 @@ import { useCallback, useEffect, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, Crown, Flag, Loader2, LogOut, Plus, Shield, Swords, Trophy } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
 import { CaptainAvatar } from "@/components/GameSprite";
 import { usePlayer } from "@/hooks/usePlayer";
 import { playSfx } from "@/lib/sound";
